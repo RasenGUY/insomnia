@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  wallets   Wallet[]
+
+  @@map("profiles")
+}
+
+model Wallet {
+  id        String      @id @default(uuid())
+  address   String      @unique
+  profileId String      @map("profile_id")
+  profile   Profile     @relation(fields: [profileId], references: [id])
+  isDefault Boolean     @default(false) @map("is_default")
+  label     WalletLabel @default(ETHEREUM)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@map("wallets")
+}
+
+enum WalletLabel {
+  ETHEREUM
+  POLYGON
+  BSC
+}
