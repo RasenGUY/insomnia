@@ -1,0 +1,13 @@
+# Env
+PORT=3000
+
+# API
+NEXT_PUBLIC_API=http://localhost:4000
+NEXT_PUBLIC_AUTH_URL=http://localhost:4000/auth
+
+# Auth
+AUTH_SESSION_MAX_AGE=604800
+
+# Ethereum
+NEXT_PUBLIC_ETHEREUM_CHAIN=polygon
+NEXT_PUBLIC_ETHEREUM_PROVIDER_URL=justChangeMe
