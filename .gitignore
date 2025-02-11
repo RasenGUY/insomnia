@@ -2,6 +2,7 @@
 
 # Dependencies
 node_modules
+node_modules/*
 .pnp
 .pnp.js
 
@@ -34,3 +35,7 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+
+services/pgadmin_init.json
+services/.pgpass

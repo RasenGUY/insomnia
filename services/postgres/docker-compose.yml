@@ -1,0 +1,46 @@
+services:
+  insomnia-wallet-postgres:
+    image: postgres:latest
+    container_name: insomnia-wallet-postgres
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    networks:
+      - insomnia-wallet-network
+    volumes:
+      - insomnia-wallet-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: insomnia-wallet-pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      MASTER_PASSWORD: ${PGADMIN_MASTER_PASSWORD:-masterpassword}
+      PGADMIN_CONFIG_CSRF_ENABLED: "False"
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+    volumes:
+      - insomnia-wallet-pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin_init.json:/pgadmin4/servers.json
+    ports:
+      - "4080:80"
+    restart: always
+    networks:
+      - insomnia-wallet-network
+
+volumes:
+  insomnia-wallet-postgres-data:
+    name: insomnia-wallet-postgres-data
+  insomnia-wallet-pgadmin-data:
+    name: insomnia-wallet-pgadmin-data
+
+networks:
+  insomnia-wallet-network:
+    name: insomnia-wallet-network

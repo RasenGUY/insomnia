@@ -1,0 +1,38 @@
+services:
+  insomnia-wallet-postgres:
+    extends:
+      file: ./services/postgres/docker-compose.yml
+      service: insomnia-wallet-postgres
+    env_file:
+      - ./services/postgres/.env
+
+  # pgadmin:
+  #   extends:
+  #     file: ./services/postgres/docker-compose.yml
+  #     service: pgadmin
+  #   env_file:
+  #     - ./services/postgres/.env
+
+  # api:
+  #   extends:
+  #     file: ./packages/server/docker-compose.yml
+  #     service: insomnia-wallet-service
+  #   build:
+  #     context: .
+  #     dockerfile: ./packages/server/Dockerfile
+  #   volumes:
+  #     - ./packages/server:/app/packages/server
+  #   env_file:
+  #     - ./packages/server/.env
+  #   depends_on:
+  #     - insomnia-wallet-postgres
+
+volumes:
+  insomnia-wallet-postgres-data:
+    name: insomnia-wallet-postgres-data
+  insomnia-wallet-pgadmin-data:
+    name: insomnia-wallet-pgadmin-data
+
+networks:
+  insomnia-wallet-network:
+    name: insomnia-wallet-network
