@@ -36,6 +36,7 @@ export const config: Config = {
       getRequiredEnvVar('NEXT_PUBLIC_ETHEREUM_CHAIN', 'localhost'),
     ),
     providerUrl: getRequiredEnvVar('NEXT_PUBLIC_ETHEREUM_PROVIDER_URL', '#'),
+    walletConnectId: getRequiredEnvVar('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID', '#'),
   },
 }
 

@@ -13,6 +13,7 @@ export const configClientSchema = Joi.object({
   ethereum: Joi.object({
     chain: Joi.object().required(),
     providerUrl: Joi.string().required(),
+    walletConnectId: Joi.string().required(),
   }).required(),
 })
 

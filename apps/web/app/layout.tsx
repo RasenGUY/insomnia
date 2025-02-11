@@ -2,12 +2,9 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { PublicEnvScript } from 'next-runtime-env'
 import "@workspace/ui/globals.css"
 
-import { SidebarProvider, SidebarTrigger } from "@workspace/ui/components/sidebar"
-
+import { SidebarProvider } from "@workspace/ui/components/sidebar"
 import ClientProvider from "components/providers/ClientProvider"
-import Navbar from "components/features/navigation/Navbar"
 import AppSidebar from "components/features/navigation/AppSidebar"
-import { CustomTrigger } from "@/components/features/navigation/AppSidebar/components/CustomTrigger"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -35,17 +32,12 @@ export default function RootLayout({
         <ClientProvider>
           <SidebarProvider 
             style={{
-              "--sidebar-width": "7.5rem",
+              "--sidebar-width": "10rem",
               "--sidebar-width-mobile": "20rem",
             } as React.CSSProperties}>
-            <AppSidebar />
-            <div className="w-full"> {/* sidebar container */}
-              <Navbar />
-              <main>
-                {children}
-                {/* <section>Hi</section> */}
-              </main>
-            </div>
+            <AppSidebar>
+               {children}
+            </AppSidebar>
           </SidebarProvider>
         </ClientProvider>
       </body>

@@ -37,5 +37,6 @@ export interface AuthServerConfig {
 export interface EthereumConfig {
   chain: Chain
   providerUrl: string
+  walletConnectId: string
 }
 
