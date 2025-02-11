@@ -1,21 +1,25 @@
-import { ConnectKitButton } from "connectkit"; 
-import { Button } from "@workspace/ui/components/button"
+import React from 'react';
+import { Button } from '@workspace/ui/components/button';
+import type { ButtonProps } from '@workspace/ui/components/button';
+import { ConnectKitButton } from 'connectkit';
 
-
-type SignInProps = Record<string, never>
-
-const ConnectButton: React.FC<SignInProps> = () => {
-  return (
-    <ConnectKitButton.Custom>
-      {({ isConnected, isConnecting, show, hide, address, ensName, chain }) => {
-        return (
-          <Button className="px-4" onClick={show}>
+const ConnectButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <ConnectKitButton.Custom>
+        {({ isConnected, isConnecting, show, hide, address, ensName, chain }) => (
+          <Button
+            ref={ref}
+            onClick={show}
+            className={className}
+            {...props}
+          >
             {isConnected ? address : "Connect"}
           </Button>
-        );
-      }}
-    </ConnectKitButton.Custom>
-  )
-}
-
-export default ConnectButton
+        )}
+      </ConnectKitButton.Custom>
+    );
+  }
+);
+ConnectButton.displayName = "ConnectButton";
+export default ConnectButton;

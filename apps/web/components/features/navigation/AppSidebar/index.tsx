@@ -65,11 +65,11 @@ export default function AppSidebar({ children }: Readonly<{ children: React.Reac
         <SidebarRail />
       </Sidebar>
       <div className="w-full"> {/* sidebar container */}
-      <Navbar />
-      <main>
-        {children}
-        {/* <section>Hi</section> */}
-      </main>
+        <Navbar />
+        <main className="w-full">
+          {children}
+          {/* <section>Hi</section> */}
+        </main>
     </div>
     </>
   )
