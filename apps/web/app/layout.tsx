@@ -5,6 +5,7 @@ import "@workspace/ui/globals.css"
 import { SidebarProvider } from "@workspace/ui/components/sidebar"
 import ClientProvider from "components/providers/ClientProvider"
 import AppSidebar from "components/features/navigation/AppSidebar"
+import { SessionCallProvider } from "@/components/providers/SessionCallProvider"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -21,6 +22,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -30,15 +32,17 @@ export default function RootLayout({
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased w-full`}
       >
         <ClientProvider>
-          <SidebarProvider 
-            style={{
-              "--sidebar-width": "10rem",
-              "--sidebar-width-mobile": "20rem",
-            } as React.CSSProperties}>
-            <AppSidebar>
-               {children}
-            </AppSidebar>
-          </SidebarProvider>
+          <SessionCallProvider>
+            <SidebarProvider 
+              style={{
+                "--sidebar-width": "10rem",
+                "--sidebar-width-mobile": "20rem",
+              } as React.CSSProperties}>
+              <AppSidebar>
+                {children}
+              </AppSidebar>
+            </SidebarProvider>
+          </SessionCallProvider>
         </ClientProvider>
       </body>
     </html>

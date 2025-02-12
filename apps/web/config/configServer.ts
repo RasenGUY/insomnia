@@ -2,7 +2,7 @@ import { configServerSchema } from './configSchema'
 import { getRequiredEnvVar } from 'utils/config'
 import { ConfigServer, Environment } from 'types/config'
 
-export const configServer: ConfigServer = {
+export const config: ConfigServer = {
   env: process.env.NODE_ENV as Environment,
   auth: {
     sessionMaxAge: parseInt(getRequiredEnvVar('AUTH_SESSION_MAX_AGE', 3600)),
@@ -10,10 +10,9 @@ export const configServer: ConfigServer = {
 }
 
 export const getServerConfiguration = async (): Promise<ConfigServer> => {
-  return configServer
+  return config
 }
 
-// Schema validation
 getServerConfiguration().then((config) => {
   const validationResult = configServerSchema.validate(config)
 

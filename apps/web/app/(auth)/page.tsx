@@ -2,6 +2,7 @@ import React from 'react'
 import type { Metadata } from 'next'
 
 import { config } from '@/config/configClient'
+import Connect from 'components/features/wallet/ConnectButton'
 
 export const metadata: Metadata = {
   title: `Sign In - ${config.name}`,
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 }
 
 const ConnectPage: React.FC = () => {
-  return <></>
+  return <Connect />
 }
 
 export default ConnectPage

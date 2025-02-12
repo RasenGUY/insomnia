@@ -1,11 +1,9 @@
 // components/Navbar.js
 "use client";
-
 import {
   NavigationMenu,
 } from "@workspace/ui/components/navigation-menu";
 import ConnectButton from "components/features/wallet/ConnectButton";
-
 
 export default function Navbar() {
   return (

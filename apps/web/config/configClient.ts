@@ -20,8 +20,8 @@ const getChain = (chainName: string): Chain => {
 }
 
 export const config: Config = {
-  env: process.env.ENV
-    ? (process.env.ENV as Environment)
+  env: process.env.NODE_ENV
+    ? (process.env.NODE_ENV as Environment)
     : Environment.PRODUCTION,
   name,
   version: process.env.version ? process.env.version : '0.0.0',
