@@ -65,7 +65,7 @@ describe('ResolverController', () => {
 
     it('should successfully resolve username and return transformed response', async () => {
       mockResolverService.resolveUsername.mockResolvedValue(mockProfile);
-      const expectedResponse = ResponseTransformer.success(mockProfile);
+      const expectedResponse = ResponseTransformer.success('Resolved successfully', mockProfile);
 
       const dto = { username: mockUsername } as UsernameParamDto;
       const result = await controller.resolve(dto);
@@ -158,7 +158,7 @@ describe('ResolverController', () => {
 
     it('should successfully resolve wallet address and return transformed response', async () => {
       mockResolverService.resolveWallet.mockResolvedValue(mockProfile);
-      const expectedResponse = ResponseTransformer.success(mockProfile);
+      const expectedResponse = ResponseTransformer.success('Reverse resolved successfully', mockProfile);
 
       const dto = { walletAddress: mockWalletAddress } as WalletAddressParamDto;
       const result = await controller.reverse(dto);
@@ -230,7 +230,7 @@ describe('ResolverController', () => {
     it('should handle case-sensitive wallet addresses', async () => {
       const lowerCaseAddress = mockWalletAddress.toLowerCase();
       mockResolverService.resolveWallet.mockResolvedValue(mockProfile);
-      const expectedResponse = ResponseTransformer.success(mockProfile);
+      const expectedResponse = ResponseTransformer.success('Resolved successfully', mockProfile);
 
       const result = await controller.reverse({ walletAddress: lowerCaseAddress } as WalletAddressParamDto);
 

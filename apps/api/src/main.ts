@@ -27,7 +27,12 @@ async function bootstrap(): Promise<void> {
       secret: sessionConfig.secret,
       resave: sessionConfig.resave,
       saveUninitialized: sessionConfig.saveUninitialized,
-      cookie: { secure: sessionConfig.cookie.secure },
+      cookie: { 
+        secure: sessionConfig.cookie.secure,
+        httpOnly: sessionConfig.cookie.httpOnly,
+        maxAge: sessionConfig.cookie.maxAge,
+        path: '/', 
+      },
     }),
   );
 
@@ -75,7 +80,9 @@ async function bootstrap(): Promise<void> {
 
   // Cors
   if (corsConfig.enabled) {
-    app.enableCors()
+    app.enableCors({
+      credentials: true
+    })
   }
 
   // Start

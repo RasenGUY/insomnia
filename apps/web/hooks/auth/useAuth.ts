@@ -1,44 +1,27 @@
 import { useCallback } from 'react'
-import { useAccount, useDisconnect } from 'wagmi'
-// import { useSessionStore } from 'components/features/session/store'
-import { useVerify } from 'hooks/auth/queries'
-// import { parseSessionResponseData } from 'utils/session'
+import { useAccount } from 'wagmi'
+
+import { useVerify } from './useVerify'
+import { Address } from 'viem'
 
 export const useAuth = () => {
-  const { address, chainId } = useAccount()
-  const { disconnectAsync } = useDisconnect()
-  const { mutateAsync: verify, isPending: isVerifying } = useVerify()
-  // const { setSession, clearSession } = useSessionStore()
+  const { mutateAsync: verify, isPending, isSuccess, isError } = useVerify()
 
-  const handleVerify = useCallback(async () => {
+  const handleVerify = useCallback(async (address: Address | undefined, chainId: number) => {
     if (!address || !chainId) {
       throw new Error('Wallet not connected')
     }
-
-    try {
-      const result = await verify({ address, chainId })
-      // setSession(parseSessionResponseData(result))
-      return result
-    } catch (error) {
-      // clearSession()
-      throw error
-    }
-  }, [address, chainId, verify,])
-
-  const logout = useCallback(async () => {
-    try {
-      await disconnectAsync()
-      // clearSession()
-    } catch (error) {
-      console.error('Logout error:', error)
-      // trigger session clear even if disconnect fails
-    }
-  }, [disconnectAsync, ])
+    
+    const result = await verify({ address, chainId })
+    // here we want to trigger the session store to hydrate the session
+    // if the session is valid then we want to redirect to the dashboard
+    // if the session is not valid then we want to show the verify account modal
+  }, [verify])
 
   return {
     verify: handleVerify,
-    logout,
-    isConnected: !!address,
-    isVerifying
+    isVerifying: isPending,
+    isVerifySuccess: isSuccess,
+    isVerifyError: isError,
   }
 }

@@ -32,10 +32,15 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       meta: exception.meta,
       target: exception.meta?.target,
     });
+    
+    const error = {
+      code: errorResponse.code,
+      message: errorResponse.message,
+    }
 
     response
       .status(errorResponse.code)
-      .json(ResponseTransformer.error(errorResponse.message));
+      .json(ResponseTransformer.error(error, exception.meta));
   }
 
   private handlePrismaError(error: Prisma.PrismaClientKnownRequestError) {
@@ -45,13 +50,15 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         const target = error.meta?.target as string[];
         const response = {
           code: HttpStatus.CONFLICT,
-          message: `Unique constraint violation: ${target?.join(', ')}` 
+          message: `Unique constraint violation: ${target?.join(', ')}`,
+          details: error.meta ?? undefined 
         }
         return response;
       }
 
       // Record not found
-      case 'P2025': {
+      case 'P2025':
+      case 'P2021': {
         return {
           code: HttpStatus.NOT_FOUND,
           message: 'Record not found',

@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseResponse } from 'common/responses/base.response';
 import { HealthCheckDto } from './health-check.dto';
 
-export class HealthCheckResponseDto implements Omit<BaseResponse<HealthCheckDto>, 'message'> {
+export class HealthCheckResponseDto extends HealthCheckDto {
     @ApiProperty({
         description: 'Response success status',
         example: true

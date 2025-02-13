@@ -48,7 +48,10 @@ export interface SessionConfig {
   resave: boolean
   saveUninitialized: boolean
   cookie: {
-    secure: boolean
+    secure: boolean,
+    httpOnly: boolean,
+    maxAge: number,
+    sameSite: string,
   }
 }
 

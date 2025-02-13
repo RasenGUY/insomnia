@@ -1,24 +1,52 @@
 import { ClassConstructor, plainToClass } from "class-transformer";
-import { BaseResponse } from "../responses/base.response";
-import { PaginatedResponse } from "../responses/pagination.response";
+import { ResponseSuccessPaginated } from "../responses/pagination.response";
+import { ResponseSuccessDto } from "common/dtos/response-success.dto";
+import { ResponsePaginatedMetaDto } from "common/dtos/response-paginated-meta-dto";
+import { ResponseErrorDto } from "common/dtos/response-error.dto";
+import { ErrorDto } from "common/dtos/error-dto";
 
 export class ResponseTransformer {
-    static success<T>(data: T): BaseResponse<T> {
-      return new BaseResponse<T>(true, data);
+    static success<T>(message: string, data: T): ResponseSuccessDto<T, undefined> {
+      return new ResponseSuccessDto<T, undefined>({
+        status: 'success',
+        data,
+        message,
+      }); 
+    }
+
+    static successWithMeta<T, M>(message: string, data: T, meta: M): ResponseSuccessDto<T, M> {
+      return new ResponseSuccessDto<T, M>({
+        status: 'success',
+        data,
+        meta,
+        message,
+      });
     }
   
-    static paginated<T>(
+    static successPaginated<T>(
       data: T[],
-      total: number,
-      page: number,
-      limit: number,
+      meta: ResponsePaginatedMetaDto, 
       message = 'Data retrieved successfully'
-    ): PaginatedResponse<T[]> {
-      return new PaginatedResponse<T[]>(true, message, data, total, page, limit);
+    ): ResponseSuccessPaginated<T> {
+      return new ResponseSuccessPaginated<T>({
+        status: "success", 
+        message, 
+        meta,
+        data
+      }); 
     }
   
-    static error(message: string): BaseResponse<null> {
-      return new BaseResponse(false, null, message);
+    static error<D>(
+      error: ErrorDto<D>,
+      details?: D
+    ): ResponseErrorDto<D> {
+      return new ResponseErrorDto<D>({
+        status: "error",
+        error: {
+          ...error,
+          details  
+        } 
+      });
     }
   
     static transform<T, V>(data: T, dto: ClassConstructor<V>): V {

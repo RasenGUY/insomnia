@@ -1,12 +1,14 @@
 import {
-    ExceptionFilter,
-    Catch,
-    ArgumentsHost,
-    HttpException,
-    Logger
-  } from '@nestjs/common';
-  import { Response } from 'express';
-  import { ResponseTransformer } from '../transformers/response.transformer';
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  Logger
+} from '@nestjs/common';
+import { Response } from 'express';  
+import { ModelTransformer } from 'common/transformers/model.transferformer';
+import { ResponseErrorDto } from 'common/dtos/response-error.dto';
+import { ResponseTransformer } from 'common/transformers/response.transformer';
   
   @Catch(HttpException)
   export class HttpExceptionFilter implements ExceptionFilter {
@@ -35,9 +37,12 @@ import {
         message,
         stack: exception.stack,
       });
-  
+      const error = {
+        code: status,
+        message,
+      }
       response
         .status(status)
-        .json(ResponseTransformer.error(message));
+        .json(ResponseTransformer.error(error));
     }
   }

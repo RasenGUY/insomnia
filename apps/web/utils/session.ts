@@ -1,8 +1,11 @@
-import { SessionResponseData, SessionState } from "types/session";
+import { GetSessionResponseData, SessionState } from "types/session";
 
 export function parseSessionState(
-    data: SessionResponseData 
+    data: GetSessionResponseData | undefined
 ) {
+    if (!data) {
+        return null;
+    }
     return ({
         address: data.address,
         chainId: data.chainId,

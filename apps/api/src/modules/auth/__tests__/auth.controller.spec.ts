@@ -66,7 +66,7 @@ describe('AuthController', () => {
 
     it('should successfully generate and store nonce in session', async () => {
       mockAuthService.generateNonce.mockResolvedValue(mockNonce);
-      const expectedResponse = ResponseTransformer.success({ nonce: mockNonce });
+      const expectedResponse = ResponseTransformer.success("Nonce generated successfully",{ nonce: mockNonce });
 
       const result = await controller.getNonce(mockSession);
 

@@ -5,7 +5,7 @@ import "@workspace/ui/globals.css"
 import { SidebarProvider } from "@workspace/ui/components/sidebar"
 import ClientProvider from "components/providers/ClientProvider"
 import AppSidebar from "components/features/navigation/AppSidebar"
-import { SessionCallProvider } from "@/components/providers/SessionCallProvider"
+import { SessionCallStoreProvider } from "@/components/providers/SessionCallStoreProvider"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -32,7 +32,7 @@ export default function RootLayout({
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased w-full`}
       >
         <ClientProvider>
-          <SessionCallProvider>
+          <SessionCallStoreProvider>
             <SidebarProvider 
               style={{
                 "--sidebar-width": "10rem",
@@ -42,7 +42,7 @@ export default function RootLayout({
                 {children}
               </AppSidebar>
             </SidebarProvider>
-          </SessionCallProvider>
+          </SessionCallStoreProvider>
         </ClientProvider>
       </body>
     </html>

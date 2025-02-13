@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Address } from "viem";
 
 export class SiweDto {
     @ApiProperty({
         description: 'Ethereum address of the authenticated user',
         example: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
     })
-    address!: string;
+    address!: Address;
 
     @ApiProperty({
         description: 'Chain ID of the network',

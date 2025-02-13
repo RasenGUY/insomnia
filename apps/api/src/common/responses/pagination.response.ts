@@ -1,29 +1,26 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { BaseResponse } from "./base.response";
+import { ResponsePaginatedMetaDto } from "common/dtos/response-paginated-meta-dto";
+import { ResponseSuccessDto } from "common/dtos/response-success.dto";
 
-export class PaginatedResponse<T> extends BaseResponse<T> {
-    @ApiProperty()
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+export class ResponseSuccessPaginated<T> extends ResponseSuccessDto<T[]> {
   
-    constructor(
-      success: boolean,
-      message: string,
-      data: T,
-      total: number,
-      page: number,
-      limit: number
-    ) {
-      super(success, data, message);
-      this.pagination = {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      };
-    }
+  @ApiProperty({
+    description: 'Paginated response',
+    type: 'array',
+  })
+  data!: T[];
+
+  constructor(params: { 
+    status: string, 
+    data: T[],
+    message: string, 
+    meta?: ResponsePaginatedMetaDto
+  }) {
+    super({
+      status: params.status,
+      message: params.message,
+      data: params.data,
+    });
+    this.meta = params.meta;
   }
+}

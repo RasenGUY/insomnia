@@ -1,3 +1,4 @@
+
 export interface VerifyResponse {
   success: boolean
   data: SessionResponseData
@@ -7,6 +8,7 @@ export interface SessionResponse {
   success: boolean; 
   data: SessionResponseData
 }
+
 export interface SessionResponseData {
   address: string;
   chainId: number;

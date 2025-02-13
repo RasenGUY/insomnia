@@ -18,7 +18,6 @@ export class RegistrationService {
   async registerWallet(dto: RegistrationDto){
     return this.prisma.$transaction(async (tx) => {
       const profile = await this.profileService.createProfile(dto.username);
-
       const wallet = await this.walletService.createWallet(
         {
           address: dto.address,
@@ -26,7 +25,7 @@ export class RegistrationService {
           label: WalletLabel.POLYGON
         },
       );
-      profile.wallets = [wallet]; // first time we create a wallet, we set it as default
+      profile.wallets = [wallet];
       return profile;
     });
   }

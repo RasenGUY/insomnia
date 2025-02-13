@@ -25,6 +25,9 @@ import { CommonErrorResponsAPiProps } from 'common/responses/common-errors-api.r
 import { VerifyResponseDto } from './dto/verify-response.dto';
 import { RegistrationResponseDto } from './dto/registration-response.dto';
 import { CommonSuccessResponsApiProps } from 'common/responses/common-success-api.response';
+import { SessionResponseDto } from './dto/session-response.dto';
+import { ModelTransformer } from 'common/transformers/model.transferformer';
+import { SiweDto } from './dto/siwe-dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -51,15 +54,16 @@ export class AuthController {
       @Session() session: Record<string, any>,
   ) {
       const storedNonce = session.nonce;
+      
       if (!storedNonce) {
-          throw new UnauthorizedException('No nonce found in session');
+        throw new UnauthorizedException('No nonce found in session');
       }
 
       try {
           const verifiedMessage = await this.authService.verifySiweMessage(
-              dto.message,
-              dto.signature,
-              storedNonce
+            dto.message,
+            dto.signature,
+            storedNonce
           );
 
           session.siwe = verifiedMessage;
@@ -71,40 +75,39 @@ export class AuthController {
             signature: dto.signature, 
           });
 
-          return ResponseTransformer.success({
-              address: verifiedMessage.address,
-              chainId: verifiedMessage.chainId,
-              domain: verifiedMessage.domain,
-              issuedAt: verifiedMessage.issuedAt,
-              expirationTime: verifiedMessage.expirationTime,
-              resources: verifiedMessage.resources
+          return ResponseTransformer.success('Siwe verification success', {
+            address: verifiedMessage.address,
+            chainId: verifiedMessage.chainId,
+            domain: verifiedMessage.domain,
+            issuedAt: verifiedMessage.issuedAt,
+            expirationTime: verifiedMessage.expirationTime,
+            resources: verifiedMessage.resources
           });
 
       } catch (error: any) {
-            session.siwe = null;
-            session.nonce = null;
-            
-            if (error instanceof SiweError) {
-                switch (error.type) {
-                    case SiweErrorType.EXPIRED_MESSAGE:
-                        throw new UnauthorizedException('Message has expired');
-                    case SiweErrorType.INVALID_SIGNATURE:
-                        throw new UnauthorizedException('Invalid signature');
-                    case SiweErrorType.INVALID_NONCE:
-                        throw new UnauthorizedException('Invalid nonce');
-                    case SiweErrorType.INVALID_ADDRESS:
-                        throw new UnauthorizedException('Invalid Ethereum address');
-                    case SiweErrorType.INVALID_DOMAIN:
-                        throw new UnauthorizedException('Invalid domain');
-                    case SiweErrorType.INVALID_URI:
-                        throw new UnauthorizedException('Invalid URI format');
-                    case SiweErrorType.UNABLE_TO_PARSE:
-                        throw new UnauthorizedException('Unable to parse message');
-                    default:
-                        throw new UnauthorizedException(error.type || 'Verification failed');
-                }
+        session.siwe = null;
+        session.nonce = null;            
+        if (error instanceof SiweError) {
+            switch (error.type) {
+              case SiweErrorType.EXPIRED_MESSAGE:
+                throw new UnauthorizedException('Message has expired');
+              case SiweErrorType.INVALID_SIGNATURE:
+                throw new UnauthorizedException('Invalid signature');
+              case SiweErrorType.INVALID_NONCE:
+                throw new UnauthorizedException('Invalid nonce');
+              case SiweErrorType.INVALID_ADDRESS:
+                throw new UnauthorizedException('Invalid Ethereum address');
+              case SiweErrorType.INVALID_DOMAIN:
+                throw new UnauthorizedException('Invalid domain');
+              case SiweErrorType.INVALID_URI:
+                throw new UnauthorizedException('Invalid URI format');
+              case SiweErrorType.UNABLE_TO_PARSE:
+                throw new UnauthorizedException('Unable to parse message');
+              default:
+                throw new UnauthorizedException(error.type || 'Verification failed');
             }
-            throw error;
+        }
+        throw error;
       }
   }
 
@@ -121,9 +124,13 @@ export class AuthController {
   })
   @ApiResponse(CommonErrorResponsAPiProps.InternalServerError)
   async getNonce(@Session() session: Record<string, any>) {
-      const nonce = await this.authService.generateNonce();
-      session.nonce = nonce;
-      return ResponseTransformer.success({ nonce });
+    const nonce = await this.authService.generateNonce();
+    session.nonce = nonce;
+    this.logger.log({ 
+      message: 'getNonce',
+      nonce 
+    });
+    return ResponseTransformer.success('Nonce generated successfully', { nonce });
   }
 
 
@@ -144,6 +151,26 @@ export class AuthController {
       }
 
       const profile = await this.registrationService.registerWallet(dto);
-      return ResponseTransformer.success(profile);
+      return ResponseTransformer.success('Profile created successfully', profile); 
+  }
+
+  @Get('session')
+  @UseGuards(AuthGuard)
+  @HandleHttpExceptions()
+  @ApiOperation({ summary: 'Retrieves session data with a cookie.sid' })
+  @ApiResponse(CommonSuccessResponsApiProps.OK(SessionResponseDto))
+  @ApiResponse(CommonErrorResponsAPiProps.Unauthorized)
+  async getSession(
+      @Session() session: Record<string, any>
+  ) {
+    if (!session.siwe) {
+      throw new UnauthorizedException();
+    }
+    const siwDto = ModelTransformer.toDto(session.siwe, SiweDto);
+    this.logger.log({
+      message: 'getSession',
+      session: siwDto
+    })
+    return ResponseTransformer.success('Session retrieved successfully', siwDto);
   }
 }

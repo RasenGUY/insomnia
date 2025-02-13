@@ -8,21 +8,22 @@ import {
 } from '@workspace/ui/components/dialog'
 import { Button } from '@workspace/ui/components/button'
 import { Alert, AlertDescription } from '@workspace/ui/components/alert'
-import { VerifyResponseDto } from 'types/auth'
+import { useQuery } from '@tanstack/react-query'
 
 interface VerifyAccountModalProps {
   isOpen: boolean
-  onVerify: () => Promise<VerifyResponseDto>
-  isVerifying: boolean
-  error?: string
 }
-
-export const VerifyAccountModal = ({
-  isOpen,
-  onVerify,
-  isVerifying,
-  error
-}: VerifyAccountModalProps) => {
+// what state does this modal need
+  // isOpen: boolean
+  // onVerify: () => Promise<VerifyResponseDto>
+  // isVerifying: boolean
+  // error?: string
+export const VerifyAccountModal = ({ isOpen }: VerifyAccountModalProps) => {
+  const { data, refetch } = useQuery({
+    queryKey: ['yourQueryKey'],
+    queryFn: verifyQuery,
+    enabled: false, // Disable automatic fetching
+  });
   return (
     <Dialog open={isOpen}>
       <DialogContent className="sm:max-w-md">

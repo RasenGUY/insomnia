@@ -20,10 +20,13 @@ export default (): Config => ({
   },
   session: {
     secret: process.env.SESSION_SECRET ?? 'secret',
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     cookie: {
-      secure: false,
+      secure: process.env.NODE_ENV === 'production', // Should be true in production
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      sameSite: 'lax' // Recommended for CSRF protection
     }
   },
   swagger: {

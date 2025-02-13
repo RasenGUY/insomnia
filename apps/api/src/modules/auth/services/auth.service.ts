@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SiweMessage, generateNonce, VerifyParams, SiweResponse, VerifyOpts } from 'siwe';
+import { SiweMessage, generateNonce, VerifyParams, SiweResponse  } from 'siwe';
 
 @Injectable()
 export class AuthService {

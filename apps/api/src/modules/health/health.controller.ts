@@ -24,6 +24,6 @@ export class HealthController {
   @Get()
   async check() {
     const response = await this.healthService.checkDatabaseConnection();
-    return ResponseTransformer.success(response);
+    return ResponseTransformer.success('Health check success', response);
   }
 }

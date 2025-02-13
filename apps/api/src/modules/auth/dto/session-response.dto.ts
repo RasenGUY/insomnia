@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { SiweDto } from './siwe-dto';
 import { ResponseSuccessDto } from 'common/dtos/response-success.dto';
-import { ProfileDto } from 'modules/profile/profile.dto';
 
-export class ProfileResponseDto extends ResponseSuccessDto<ProfileDto> {
+export class SessionResponseDto extends ResponseSuccessDto<SiweDto> {
     @ApiProperty({
         description: 'Response success status',
         example: true
@@ -10,10 +10,10 @@ export class ProfileResponseDto extends ResponseSuccessDto<ProfileDto> {
     success!: boolean;
 
     @ApiProperty({
-        description: 'Response data containing profile information',
-        type: ProfileDto
+        description: 'Response data containing verification details',
+        type: SiweDto
     })
-    data!: ProfileDto;
+    data!: SiweDto
 
     @ApiProperty({
         description: 'Response timestamp',

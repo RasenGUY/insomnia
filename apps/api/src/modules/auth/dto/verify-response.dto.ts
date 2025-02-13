@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseResponse } from 'common/responses/base.response';
 import { SiweDto } from './siwe-dto';
+import { ResponseSuccessDto } from 'common/dtos/response-success.dto';
 
-export class VerifyResponseDto implements Omit<BaseResponse<SiweDto>, 'message'> {
+export class VerifyResponseDto extends ResponseSuccessDto<SiweDto> {
     @ApiProperty({
         description: 'Response success status',
         example: true

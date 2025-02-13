@@ -4,14 +4,13 @@ import React from 'react'
 import { ConnectWalletSection } from 'components/features/home/ConnectWalletSection'
 import { RegisterModal } from 'components/features/auth/RegisterModal'
 import { VerifyAccountModal } from 'components/features/auth/VerifyAccountModal'
-import { validateSession } from '@/utils/auth'
-import { useSessionStore } from '@/components/features/auth/store'
+import { useSessionValidity } from '@/hooks/session'
 import { useAccount } from 'wagmi'
 
 export default function AppPage() {
   
     const {  isConnected } = useAccount()
-    const store = useSessionStore()
+    const isAuthenticated = useSessionValidity()
     
     if (!isConnected) {
         return (
@@ -21,16 +20,11 @@ export default function AppPage() {
         )
     }
     
-    return <></> 
-    
-    (
+    return  (
         <>
-            {/* <VerifyAccountModal
-                isOpen={!validateSession(store.getState())}
-                onVerify={verify}
-                isVerifying={isVerifying}
-            />
-         */}
+             <VerifyAccountModal
+                isOpen={!isAuthenticated}
+                />
             {/* <RegisterModal
                 isOpen={needsRegistration}
                 onRegister={register}

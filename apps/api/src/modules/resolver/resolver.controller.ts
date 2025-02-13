@@ -47,7 +47,7 @@ export class ResolverController {
             message: 'resolve',
             username: params.username,
         });
-        return ResponseTransformer.success(profile);
+        return ResponseTransformer.success('Resolved successfully', profile);
     }
     
     @Get('reverse/:walletAddress')
@@ -72,6 +72,6 @@ export class ResolverController {
             message: 'reverseResolve',
             walletAddress: params.walletAddress,
         });
-        return ResponseTransformer.success(profile);
+        return ResponseTransformer.success('Reverse resolved successfully', profile);
     }
 }

@@ -13,36 +13,31 @@ export type SessionState = {
   domain: string;
   issuedAt: Date;
   expirationTime: Date;
+  isValid: boolean;
 };
-export type SessionResponseData = {
+
+export const CallStoreStates = {
+  Empty: 'empty',
+  Hydrated: 'hydrated',
+} as const;
+
+export type CallStoreState = typeof CallStoreStates[keyof typeof CallStoreStates];
+
+export interface SessionQueryClientCallProviderState {
+  sessionClient: QueryClient
+  walletConnection: Connection
+  callStoreState: CallStoreState
+  sessionState: SessionState | null
+  hydrateCallStore: () => Promise<void>
+  clearSession: () => void
+  configureWalletConnectionHooks: () => void
+}
+
+export type GetSessionResponseData = {
   address: Address;
   chainId: number;
   domain: string;
   issuedAt: string;
   expirationTime: string;
+  resources: string[];
 };
-
-export type SessionActions = {
-  setSession: (session: Partial<SessionState>) => void;
-  clearSession: () => void;
-  checkSession: () => void;
-};
-
-export const CallStates = {
-  Empty: 'empty',
-  Hydrated: 'hydrated',
-} as const;
-
-export type CallState = typeof CallStates[keyof typeof CallStates];
-
-export interface SessionQueryClientCallProviderState {
-  sessionClient: QueryClient
-  walletConnection: Connection
-  callState: CallState
-  sessionState: SessionState | null
-  isValid: boolean | null
-  validateSession: (session: SessionState) => Promise<void>
-  clearSession: () => Promise<void>
-  getSession: () => Promise<void>
-  configureWalletConnectionHooks: () => void
-}
