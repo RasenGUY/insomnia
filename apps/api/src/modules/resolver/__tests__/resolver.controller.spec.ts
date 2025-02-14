@@ -230,7 +230,7 @@ describe('ResolverController', () => {
     it('should handle case-sensitive wallet addresses', async () => {
       const lowerCaseAddress = mockWalletAddress.toLowerCase();
       mockResolverService.resolveWallet.mockResolvedValue(mockProfile);
-      const expectedResponse = ResponseTransformer.success('Resolved successfully', mockProfile);
+      const expectedResponse = ResponseTransformer.success('Reverse resolved successfully', mockProfile);
 
       const result = await controller.reverse({ walletAddress: lowerCaseAddress } as WalletAddressParamDto);
 

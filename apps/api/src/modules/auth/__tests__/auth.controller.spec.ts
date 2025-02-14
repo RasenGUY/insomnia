@@ -131,9 +131,11 @@ describe('AuthController', () => {
     it('should successfully verify SIWE message and update session', async () => {
       mockAuthService.verifySiweMessage.mockResolvedValue(mockVerifiedMessage);
       const expectedResponse = {
-        success: true,
         data: mockVerifiedMessage,
-        timestamp: expect.any(Date)
+        timestamp: expect.any(Date),
+        message: "Siwe verification success",
+        meta: undefined,
+        status: "success",
       };
 
       const result = await controller.verify(mockVerifySiweDto, mockSession);

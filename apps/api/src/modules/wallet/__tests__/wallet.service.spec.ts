@@ -5,7 +5,7 @@ import { WalletLabel } from '@prisma/client';
 import { ModelTransformer } from 'common/transformers/model.transferformer';
 
 // Mock the ModelTransformer
-jest.mock('common/transformers/model.transferformer', () => ({
+jest.mock( 'common/transformers/model.transferformer', () => ({
   ModelTransformer: {
     toDto: jest.fn(),
   },

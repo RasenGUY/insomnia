@@ -6,8 +6,6 @@ import {
   Logger
 } from '@nestjs/common';
 import { Response } from 'express';  
-import { ModelTransformer } from 'common/transformers/model.transferformer';
-import { ResponseErrorDto } from 'common/dtos/response-error.dto';
 import { ResponseTransformer } from 'common/transformers/response.transformer';
   
   @Catch(HttpException)
