@@ -22,6 +22,7 @@ export interface Config {
 export interface ConfigServer {
   env: Environment
   auth: AuthServerConfig
+  api: ApiConfig
 }
 
 export interface ApiConfig {

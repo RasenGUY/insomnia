@@ -4,7 +4,7 @@ import { configClientSchema } from 'config/configSchema'
 import { getRequiredEnvVar } from 'utils/config'
 import { Config, Environment, Theme } from 'types/config'
 
-const name = 'Autominter'
+const name = 'Insomnia Wallet'
 
 const getChain = (chainName: string): Chain => {
   switch (chainName) {

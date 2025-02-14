@@ -7,6 +7,11 @@ export const config: ConfigServer = {
   auth: {
     sessionMaxAge: parseInt(getRequiredEnvVar('AUTH_SESSION_MAX_AGE', 3600)),
   },
+  api: {
+    rest: {
+      url: getRequiredEnvVar('NEXT_PUBLIC_API', '#'),
+    },
+  },
 }
 
 export const getServerConfiguration = async (): Promise<ConfigServer> => {

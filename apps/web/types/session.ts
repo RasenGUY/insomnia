@@ -16,6 +16,15 @@ export type SessionState = {
   isValid: boolean;
 };
 
+export type Session = {
+  address: Address;
+  chainId: number;
+  domain: string;
+  issuedAt: Date;
+  expirationTime: Date;
+  isValid: boolean;
+};
+
 export const CallStoreStates = {
   Empty: 'empty',
   Hydrated: 'hydrated',
@@ -24,8 +33,8 @@ export const CallStoreStates = {
 export type CallStoreState = typeof CallStoreStates[keyof typeof CallStoreStates];
 
 export interface SessionQueryClientCallProviderState {
-  sessionClient: QueryClient
-  walletConnection: Connection
+  sessionClient: QueryClient | null
+  walletConnection: Connection | null
   callStoreState: CallStoreState
   sessionState: SessionState | null
   hydrateCallStore: () => Promise<void>

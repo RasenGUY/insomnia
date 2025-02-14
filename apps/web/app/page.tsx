@@ -1,42 +1,23 @@
 'use client'
 import React from 'react'
-
 import { ConnectWalletSection } from 'components/features/home/ConnectWalletSection'
-import { RegisterModal } from 'components/features/auth/RegisterModal'
-import { VerifyAccountModal } from 'components/features/auth/VerifyAccountModal'
-import { useSessionValidity } from '@/hooks/session'
 import { useAccount } from 'wagmi'
+import { useRouter } from 'next/navigation';
 
 export default function AppPage() {
-  
-    const {  isConnected } = useAccount()
-    const isAuthenticated = useSessionValidity()
-    
-    if (!isConnected) {
-        return (
-        <section className="w-full flex justify-center items-center min-h-screen">
-            <ConnectWalletSection />
-        </section>
-        )
-    }
-    
-    return  (
-        <>
-             <VerifyAccountModal
-                isOpen={!isAuthenticated}
-                />
-            {/* <RegisterModal
-                isOpen={needsRegistration}
-                onRegister={register}
-                isRegistering={isRegistering}
-                error={registerError?.message}
-            />
-         */}
-            {/* {isAuthenticated && <Dashboard />} */}
-        </>
-    )
-}
+  const router = useRouter();
+  const { isConnected } = useAccount()
 
+  if (isConnected) {
+    router.push('/auth')
+  } 
+
+  return (
+    <section className="w-full flex justify-center items-center min-h-screen">
+      <ConnectWalletSection />
+    </section>
+  )
+}
 
     // this render by default the connect wallet page
     // if the wallet is connect then check if the there is a valid session with siwe present

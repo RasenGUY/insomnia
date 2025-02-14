@@ -1,10 +1,9 @@
 import { SessionState } from "@/types/session";
-import { Address } from "viem";
 
 export function validateSession(
     sessionData: SessionState,
     walletData: {
-      address: Address,
+      address: string,
       chainId: number,
     }
   ){
