@@ -20,15 +20,24 @@ export interface Config {
 }
 
 export interface ConfigServer {
+  port: number
   env: Environment
   auth: AuthServerConfig
   api: ApiConfig
+  vercel: VercelConfig
+  render: RenderConfig
 }
 
 export interface ApiConfig {
   rest: {
     url: string
   }
+}
+export interface VercelConfig {
+  url: string
+}
+export interface RenderConfig {
+  hostname: string
 }
 
 export interface AuthServerConfig {

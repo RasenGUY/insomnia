@@ -28,6 +28,7 @@ import { CommonSuccessResponsApiProps } from 'common/responses/common-success-ap
 import { SessionResponseDto } from './dto/session-response.dto';
 import { ModelTransformer } from 'common/transformers/model.transferformer';
 import { SiweDto } from './dto/siwe-dto';
+import { LogoutResponseDto } from './dto/logout-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -53,8 +54,12 @@ export class AuthController {
       @Body(ValidationPipe) dto: VerifySiweDto,
       @Session() session: Record<string, any>,
   ) {
+      this.logger.debug({
+        message: 'verify',
+        dto: JSON.stringify(dto),
+        session
+      })
       const storedNonce = session.nonce;
-      
       if (!storedNonce) {
         throw new UnauthorizedException('No nonce found in session');
       }
@@ -128,7 +133,8 @@ export class AuthController {
     session.nonce = nonce;
     this.logger.log({ 
       message: 'getNonce',
-      nonce 
+      nonce,
+      session 
     });
     return ResponseTransformer.success('Nonce generated successfully', { nonce });
   }
@@ -155,22 +161,46 @@ export class AuthController {
   }
 
   @Get('session')
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @HandleHttpExceptions()
   @ApiOperation({ summary: 'Retrieves session data with a cookie.sid' })
   @ApiResponse(CommonSuccessResponsApiProps.OK(SessionResponseDto))
-  @ApiResponse(CommonErrorResponsAPiProps.Unauthorized)
+  // @ApiResponse(CommonErrorResponsAPiProps.Unauthorized)
   async getSession(
       @Session() session: Record<string, any>
   ) {
-    if (!session.siwe) {
-      throw new UnauthorizedException();
-    }
+    // if (!session.siwe) {
+    //   throw new UnauthorizedException();
+    // }
     const siwDto = ModelTransformer.toDto(session.siwe, SiweDto);
     this.logger.log({
       message: 'getSession',
-      session: siwDto
+      sessionNonce: session.nonce,
+      siwDto
     })
+    session.nonce = session.nonce;
     return ResponseTransformer.success('Session retrieved successfully', siwDto);
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  @HandleHttpExceptions()
+  @ApiOperation({ summary: 'Deletes session data with a cookie.sid' })
+  @ApiResponse(CommonSuccessResponsApiProps.OK(LogoutResponseDto))
+  @ApiResponse(CommonErrorResponsAPiProps.Unauthorized)
+  async logout(
+      @Session() session: Record<string, any>
+  ) {
+    if (!session.siwe) {
+      throw new UnauthorizedException('No session found');
+    }
+    session.siwe = null;
+    session.nonce = null;
+
+    this.logger.log({
+      message: 'logout',
+      session: null
+    })
+    return ResponseTransformer.success('Logged out successfully', null);
   }
 }

@@ -1,5 +1,4 @@
 import { Chain, polygon, localhost, polygonMumbai } from 'viem/chains'
-
 import { configClientSchema } from 'config/configSchema'
 import { getRequiredEnvVar } from 'utils/config'
 import { Config, Environment, Theme } from 'types/config'
@@ -44,11 +43,11 @@ export const getClientConfiguration = async (): Promise<Config> => {
   return config
 }
 
-// Schema validation
+// Validate configuration using Zod
 getClientConfiguration().then((config) => {
-  const validationResult = configClientSchema.validate(config)
-
-  if (validationResult.error) {
+  const validationResult = configClientSchema.safeParse(config)
+  if (!validationResult.success) {
+    // safeParse returns a detailed error if the config does not match the schema
     throw new Error(`Invalid config: ${validationResult.error.message}`)
   }
 })

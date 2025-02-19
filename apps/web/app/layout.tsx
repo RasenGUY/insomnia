@@ -1,11 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import { PublicEnvScript } from 'next-runtime-env'
 import "@workspace/ui/globals.css"
+import AppProviders from "@/components/AppProviders"
+import AppSidebar from "@/components/features/navigation/AppSidebar"
+import { AuthenticationWrapper } from "@/components/features/auth/AuthenticationWrapper"
 
-import { SidebarProvider } from "@workspace/ui/components/sidebar"
-import ClientProvider from "components/providers/ClientProvider"
-import AppSidebar from "components/features/navigation/AppSidebar"
-import { SessionCallStoreProvider } from "@/components/providers/SessionCallStoreProvider"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -31,19 +30,13 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased w-full`}
       >
-        <ClientProvider>
-          <SessionCallStoreProvider>
-            <SidebarProvider 
-              style={{
-                "--sidebar-width": "10rem",
-                "--sidebar-width-mobile": "20rem",
-              } as React.CSSProperties}>
-              <AppSidebar>
-                {children}
-              </AppSidebar>
-            </SidebarProvider>
-          </SessionCallStoreProvider>
-        </ClientProvider>
+        <AppProviders>
+          <AppSidebar>
+            <AuthenticationWrapper>
+              {children}
+            </AuthenticationWrapper>
+          </AppSidebar>
+        </AppProviders>
       </body>
     </html>
   )

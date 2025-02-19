@@ -1,5 +1,4 @@
 import { Address } from "viem";
-import { QueryClient } from "@tanstack/react-query"
 import { Connection } from "wagmi"
 
 
@@ -33,7 +32,6 @@ export const CallStoreStates = {
 export type CallStoreState = typeof CallStoreStates[keyof typeof CallStoreStates];
 
 export interface SessionQueryClientCallProviderState {
-  sessionClient: QueryClient | null
   walletConnection: Connection | null
   callStoreState: CallStoreState
   sessionState: SessionState | null

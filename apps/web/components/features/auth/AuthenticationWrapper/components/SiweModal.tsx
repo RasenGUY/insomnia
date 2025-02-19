@@ -9,19 +9,19 @@ import {
 import { Button } from '@workspace/ui/components/button'
 import { Alert, AlertDescription } from '@workspace/ui/components/alert'
 
-interface VerifyAccountModalProps {
+interface SiweModalProps {
   isOpen: boolean
   onVerify: () => Promise<void>
   isVerifying: boolean
   error?: string
 }
 
-export const VerifyAccountModal = ({ 
+export const SiweModal = ({ 
   isOpen,
   onVerify,
   isVerifying,
   error, 
-}: VerifyAccountModalProps) => {
+}: SiweModalProps) => {
   
   return (
     <Dialog open={isOpen}>

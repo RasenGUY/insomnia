@@ -20,21 +20,7 @@ async function bootstrap(): Promise<void> {
   // Winston Logger
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))
 
-  // Session
-  const sessionConfig = app.get(ConfigService).get('session') as SessionConfig
-  app.use(
-    session({
-      secret: sessionConfig.secret,
-      resave: sessionConfig.resave,
-      saveUninitialized: sessionConfig.saveUninitialized,
-      cookie: { 
-        secure: sessionConfig.cookie.secure,
-        httpOnly: sessionConfig.cookie.httpOnly,
-        maxAge: sessionConfig.cookie.maxAge,
-        path: '/', 
-      },
-    }),
-  );
+
 
   // Validation
   app.useGlobalPipes(
@@ -81,10 +67,27 @@ async function bootstrap(): Promise<void> {
   // Cors
   if (corsConfig.enabled) {
     app.enableCors({
+      origin: 'http://localhost:3000',
+      exposedHeaders: ['set-cookie'],
       credentials: true
     })
   }
 
+  // Session
+  const sessionConfig = app.get(ConfigService).get('session') as SessionConfig
+  app.use(
+    session({
+      secret: sessionConfig.secret,
+      resave: sessionConfig.resave,
+      saveUninitialized: sessionConfig.saveUninitialized,
+      cookie: { 
+        secure: sessionConfig.cookie.secure,
+        httpOnly: sessionConfig.cookie.httpOnly,
+        maxAge: sessionConfig.cookie.maxAge,
+        path: '/', 
+      },
+    }),
+  );
   // Start
   const port = configService.get<number>('port') as number
   await app.listen(port)

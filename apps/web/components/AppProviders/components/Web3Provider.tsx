@@ -21,10 +21,7 @@ export const web3Config = createConfig(
     appIcon: 'https://postimg.cc/rD5H7bsL', // your app's icon, no bigger than 1024x1024px (max. 1MB)
   }),
 );
-
-const queryClient = new QueryClient();
-
-export const Web3Provider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+export const Web3Provider = ({ queryClient, children }: Readonly<{ queryClient: QueryClient, children: React.ReactNode }>) => {
   return (
     <WagmiProvider config={web3Config}>
       <QueryClientProvider client={queryClient}>
