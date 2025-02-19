@@ -6,6 +6,7 @@ import { SiweModal } from './components/SiweModal'
 import { ConnectWalletSection } from '../../connect/ConnectWalletSection'
 import { useSiwe } from './hooks'
 import { trpc } from '@/server/client'
+import {LoadingScreen} from '../../common/LoadingScreen'
 
 export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { isConnected, address } = useAccount()
@@ -29,7 +30,7 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
   } = useSiwe()
 
   if (isValidatingSession) {
-    return <div>Loading...</div>
+    return <LoadingScreen />
   }
 
   if (!isConnected) {

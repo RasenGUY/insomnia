@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { config } from '@/config/configServer';
 import { GetNonceResponse, RegistrationResponse, VerifyResponse } from '@/types/auth';
+import { registrationSchema } from '@/lib/validations/auth';
 
 export const authRouter = router({
   getNonce: publicProcedure
@@ -27,7 +28,7 @@ export const authRouter = router({
       const { data }: GetNonceResponse = await response.json();
       return data;
     }),
-    
+
   verify: publicProcedure
   .input(z.object({
     message: z.string(),
@@ -70,13 +71,10 @@ export const authRouter = router({
   }),
 
   register: publicProcedure
-    .input(z.object({
-      username: z.string().min(3),
-      address: z.string(),
-    }))
+    .input(registrationSchema)
     .mutation(async ({ input }) => {
       try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(`${config.api.rest.url}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

@@ -9,9 +9,9 @@ PGADMIN_DATA_DIR := $(DOCKER_DATA_DIR)/pgadmin
 
 configure-pgadmin:
 	@echo "Configuring pgAdmin..."
-	@echo '{"Servers":{"1":{"Name":"Insomnia Wallet DB","Group":"Servers","Host":"insomnia-wallet-postgres","Port":5432,"MaintenanceDB":"$(POSTGRES_DB)","Username":"$(POSTGRES_USER)","SSLMode":"prefer","PassFile":"/pgpass"}}}' > pgadmin_init.json
-	@echo "insomnia-wallet-postgres:5432:$(POSTGRES_DB):$(POSTGRES_USER):$(POSTGRES_PASSWORD)" > .pgpass
-	@chmod 600 .pgpass
+	@echo '{"Servers":{"1":{"Name":"Insomnia Wallet DB","Group":"Servers","Host":"insomnia-wallet-postgres","Port":5432,"MaintenanceDB":"$(POSTGRES_DB)","Username":"$(POSTGRES_USER)","SSLMode":"prefer","PassFile":"/pgpass"}}}' > services/postgres/pgadmin_init.json
+	@echo "insomnia-wallet-postgres:5432:$(POSTGRES_DB):$(POSTGRES_USER):$(POSTGRES_PASSWORD)" > services/postgres/.pgpass
+	@chmod 600 services/postgres/.pgpass
 
 # Default environment
 ENV ?= development
