@@ -1,3 +1,4 @@
+'use client'
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog'
 import { Button } from '@workspace/ui/components/button'
@@ -5,14 +6,14 @@ import { Input } from '@workspace/ui/components/input'
 
 interface RegisterModalProps {
   isOpen: boolean;
-  onRegister: (username: string) => Promise<void>;
+  handleRegister: (username: string) => Promise<void>;
   isRegistering: boolean;
   error?: string;
 }
 
 export const RegisterModal = ({
   isOpen,
-  onRegister,
+  handleRegister,
   isRegistering,
   error,
 }: RegisterModalProps) => {
@@ -20,7 +21,7 @@ export const RegisterModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await onRegister(username)
+    await handleRegister(username)
   }
 
   return (

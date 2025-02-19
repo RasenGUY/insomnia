@@ -25,19 +25,4 @@ export class SiweDto {
         example: '2025-02-09T20:14:33.145Z'
     })
     issuedAt!: string;
-
-    @ApiProperty({
-        description: 'Optional expiration time of the signature',
-        example: '2025-02-09T21:14:33.145Z',
-        required: false
-    })
-    expirationTime?: string;
-
-    @ApiProperty({
-        description: 'Optional resources associated with the signature',
-        example: ['https://example.com/resource1'],
-        required: false,
-        type: [String]
-    })
-    resources?: string[];
 }

@@ -1,11 +1,9 @@
-// server/routers/session.ts
 import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
 import { validateSession } from '@/utils/auth';
 import { TRPCError } from '@trpc/server';
 
 export const sessionRouter = router({
-
   validateSession: publicProcedure
     .input(z.object({
       address: z.string(),
@@ -15,8 +13,9 @@ export const sessionRouter = router({
       try {
         
         let isValid: boolean = false;
-        if(ctx.session) isValid = validateSession(ctx.session, input);
-
+        if(ctx.session) {
+          isValid = validateSession(ctx.session, input);
+        }
         return { isValid };
       } catch (error) {
         throw new TRPCError({

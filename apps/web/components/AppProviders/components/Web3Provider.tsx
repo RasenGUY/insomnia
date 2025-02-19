@@ -9,7 +9,7 @@ import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 export const web3Config = createConfig(
   getDefaultConfig({
     chains: [
-        polygon
+      polygon
     ],
     transports: {
       [polygon.id]: http(config.ethereum.providerUrl),
@@ -17,8 +17,8 @@ export const web3Config = createConfig(
     walletConnectProjectId: config.ethereum.walletConnectId,
     appName: "Insomnia Wallet",
     appDescription: "Welcome to Insomnia Wallet, the best wallet for your crypto needs!",
-    appUrl: "https://localhost.com", // your app's url
-    appIcon: 'https://postimg.cc/rD5H7bsL', // your app's icon, no bigger than 1024x1024px (max. 1MB)
+    appUrl: "https://localhost.com",
+    appIcon: 'https://postimg.cc/rD5H7bsL',
   }),
 );
 export const Web3Provider = ({ queryClient, children }: Readonly<{ queryClient: QueryClient, children: React.ReactNode }>) => {

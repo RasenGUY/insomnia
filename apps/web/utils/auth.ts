@@ -1,7 +1,7 @@
-import { SessionState } from "@/types/session";
+import { Session } from "@/types/session";
 
 export function validateSession(
-    sessionData: SessionState,
+    sessionData: Session,
     walletData: {
       address: string,
       chainId: number,
@@ -11,26 +11,20 @@ export function validateSession(
   if (
       !sessionData.address || 
       !sessionData.chainId ||
-      !sessionData.domain || 
-      !sessionData.expirationTime
+      !sessionData.domain 
     ) {
-      return false;
+    return false;
   }
 
   if (    
     sessionData.address.toLocaleLowerCase() !== walletData.address.toLocaleLowerCase() || 
     sessionData.chainId !== walletData.chainId
   ) {
-      return false;
+    return false;
   }
 
   if(
-      sessionData.domain !== window.location.origin    
-  ){
-    return false;
-  }
-  if(
-      sessionData.expirationTime >= new Date()    
+    sessionData.issuedAt >= new Date()    
   ){
     return false;
   }

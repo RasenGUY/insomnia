@@ -1,12 +1,8 @@
-import { Button } from "@workspace/ui/components/button"
+'use client'
+import { RegisterModal } from '@/components/features/auth/RegisterModal'
 
 export default function Page() {
-  return (
-    <div className="flex items-center justify-center min-h-svh">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Hello World</h1>
-        <Button size="sm">Button</Button>
-      </div>
-    </div>
-  )
+  // if the user has no account then we show the register modal
+  // if the user has an account then we redirect to the home page (dashboard)
+  return <RegisterModal isOpen={true} handleRegister={async () => {}} isRegistering={false} error={''} />
 }

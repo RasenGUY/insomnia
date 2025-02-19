@@ -1,4 +1,3 @@
-// server/routers/_app.ts
 import { router } from '../trpc';
 import { sessionRouter } from './session';
 import { authRouter } from './auth';

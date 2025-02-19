@@ -8,7 +8,7 @@ import { useSiwe } from './hooks'
 import { trpc } from '@/server/client'
 
 export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const { isConnected, address, connector } = useAccount()
+  const { isConnected, address } = useAccount()
   const chainId = useChainId()
   
   const { 
@@ -21,25 +21,22 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
       refetchOnWindowFocus: true
     }
   )
+
   const { 
     verify, 
     isVerifying,
-    verifyError,
-    logout 
-  } = useSiwe(connector)
+    verifyError
+  } = useSiwe()
 
-  // Loading state
   if (isValidatingSession) {
-    return <div>Loading...</div> // Or your loading component
+    return <div>Loading...</div>
   }
 
-  // Not connected state
   if (!isConnected) {
     return <ConnectWalletSection />
   }
 
-  // Connected but not verified state
-  if (!session?.isValid) {
+  if (isConnected && !session?.isValid) {
     return (
       <SiweModal
         isOpen={true}
@@ -54,6 +51,5 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
     )
   }
 
-  // Connected and verified state
   return <>{children}</>
 }
