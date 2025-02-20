@@ -1,143 +1,123 @@
-# Makefile in root directory
-.PHONY: help setup env-setup up down build logs ps clean dev-up dev-build db-migrate db-generate install status services-up services-down services-logs fix-permissions setup-dirs configure-pgadmin
+SHELL := /bin/bash
+.PHONY: services-up services-up-build services-down services-clean dev-up dev-down dev-clean setup-env check-dependencies configure-pgadmin db-setup db-migrate
 
-# volumes
-DOCKER_DATA_DIR := data
-POSTGRES_DATA_DIR := $(DOCKER_DATA_DIR)/postgres
-PGADMIN_DATA_DIR := $(DOCKER_DATA_DIR)/pgadmin
+# Include postgres environment variables
+POSTGRES_ENV_FILE := ./services/postgres/.env
+include $(POSTGRES_ENV_FILE)
 
+# Environment Setup
+setup-env: check-dependencies
+	@echo "🔧 Setting up environment files..."
+	@test -f ./services/postgres/.env || cp ./services/postgres/.env.example ./services/postgres/.env
+	@test -f ./apps/web/.env || cp ./apps/web/.env.example ./apps/web/.env
+	@test -f ./apps/api/.env || cp ./apps/api/.env.example ./apps/api/.env
+	@echo "✅ Environment files setup complete"
 
+# Configure PgAdmin
 configure-pgadmin:
-	@echo "Configuring pgAdmin..."
-	@echo '{"Servers":{"1":{"Name":"Insomnia Wallet DB","Group":"Servers","Host":"insomnia-wallet-postgres","Port":5432,"MaintenanceDB":"$(POSTGRES_DB)","Username":"$(POSTGRES_USER)","SSLMode":"prefer","PassFile":"/pgpass"}}}' > services/postgres/pgadmin_init.json
-	@echo "insomnia-wallet-postgres:5432:$(POSTGRES_DB):$(POSTGRES_USER):$(POSTGRES_PASSWORD)" > services/postgres/.pgpass
+	@echo "🔧 Configuring pgAdmin..."
+	@if [ ! -f "$(POSTGRES_ENV_FILE)" ]; then \
+		echo "❌ Postgres environment file not found. Running setup-env first..."; \
+		$(MAKE) setup-env; \
+	fi
+	@echo '{"Servers":{"1":{"Name":"Insomnia DB","Group":"Servers","Host":"${HOST}","Port":5432,"MaintenanceDB":"$(POSTGRES_DB)","Username":"$(POSTGRES_USER)","SSLMode":"prefer","PassFile":"/pgpass"}}}' > services/postgres/pgadmin_init.json 
+	@echo "${HOST}:5432:$(POSTGRES_DB):$(POSTGRES_USER):$(POSTGRES_PASSWORD)" > services/postgres/.pgpass
 	@chmod 600 services/postgres/.pgpass
+	@echo "✅ pgAdmin configuration completed using variables from $(POSTGRES_ENV_FILE)"
 
-# Default environment
-ENV ?= development
+# Database Setup and Migration
+db-setup: configure-pgadmin
+	@echo "🏗️  Setting up database..."
+	@cd apps/api && pnpm prisma:generate
+	@echo "✅ Database setup complete"
 
-# Docker compose files
-DC_FILES := -f docker-compose.yml
-SERVICES_DC := -f services/postgres/docker-compose.yml
+db-migrate-dev:
+	@echo "🔄 Running database migrations..."
+	@cd apps/api && pnpm migrate:dev  
+	@echo "✅ Database migrations complete"
 
-# If development environment, add development overrides
-ifeq ($(ENV),development)
-	DC_FILES += -f docker-compose.dev.yml
-endif
+db-migrate:
+	@echo "🔄 Running database migrations..."
+	@cd apps/api && pnpm migrate:deploy 
+	@echo "✅ Database migrations complete"
 
-# Docker compose commands
-DC := docker compose $(DC_FILES)
-DC_SERVICES := docker compose $(SERVICES_DC)
+# Services Management
+services-up: check-dependencies configure-pgadmin
+	@echo "🚀 Starting services..."
+	@cd services/postgres && docker compose up -d
+	@echo "✅ Services started"
 
-# HELP
-help: ## Display this help message
-	@printf "\n"
-	@printf "  🔑 Insomnia Wallet Makefile Help\n"
-	@printf "\n"
-	@printf "Usage:\n"
-	@printf "  make [target] [ENV=development|production]\n"
-	@printf "\n"
-	@printf "Setup Commands:\n"
-	@printf "  %-20s %s\n" "setup" "Complete initial setup (env files, dependencies, DB client)"
-	@printf "  %-20s %s\n" "env-setup" "Create environment files from examples"
-	@printf "  %-20s %s\n" "install" "Install all dependencies"
-	@printf "\n"
-	@printf "Service Commands:\n"
-	@printf "  %-20s %s\n" "services-up" "Start only PostgreSQL and pgAdmin services"
-	@printf "  %-20s %s\n" "services-down" "Stop only PostgreSQL and pgAdmin services"
-	@printf "  %-20s %s\n" "services-logs" "Show logs from PostgreSQL and pgAdmin services"
-	@printf "\n"
-	@printf "Docker Commands:\n"
-	@printf "  %-20s %s\n" "up" "Start all services"
-	@printf "  %-20s %s\n" "down" "Stop all services"
-	@printf "  %-20s %s\n" "build" "Build all services"
-	@printf "  %-20s %s\n" "logs" "Show service logs"
-	@printf "  %-20s %s\n" "ps" "List running services"
-	@printf "  %-20s %s\n" "clean" "Remove all containers, volumes, and networks"
-	@printf "\n"
-	@printf "Development Commands:\n"
-	@printf "  %-20s %s\n" "dev-up" "Start development environment"
-	@printf "  %-20s %s\n" "dev-build" "Build development environment"
-	@printf "\n"
-	@printf "Database Commands:\n"
-	@printf "  %-20s %s\n" "db-migrate" "Run database migrations"
-	@printf "  %-20s %s\n" "db-generate" "Generate Prisma client"
-	@printf "\n"
-	@printf "Environment Variables:\n"
-	@printf "  %-20s %s\n" "ENV" "Development or production mode (default: development)"
-	@printf "\n"
+services-up-build: check-dependencies configure-pgadmin
+	@echo "🏗️  Building and starting services..."
+	@cd services/postgres && docker compose up -d --build
+	@echo "✅ Services built and started"
 
-# Default target
-.DEFAULT_GOAL := help
+services-down:
+	@echo "🔽 Stopping services..."
+	@cd services/postgres && docker compose down
+	@echo "✅ Services stopped"
 
-# Service management commands
-services-up: env-setup configure-pgadmin ## Start only PostgreSQL and pgAdmin services
-	@echo "Starting PostgreSQL and pgAdmin services..."
-	$(DC_SERVICES) up -d
+services-clean:
+	@echo "🧹 Cleaning up services..."
+	@cd services/postgres && docker compose down -v
+	@rm -f .pgpass pgadmin_init.json 2>/dev/null || true
+	@docker network rm insomnia-wallet-network 2>/dev/null || true
+	@echo "✅ Services cleaned"
 
-services-down: ## Stop only PostgreSQL and pgAdmin services
-	@echo "Stopping PostgreSQL and pgAdmin services..."
-	$(DC_SERVICES) down
+# Development Environment Management
+dev-up: setup-env check-dependencies configure-pgadmin
+	@echo "🚀 Starting development environment..."
+	
+	@echo "📦 Starting Postgres..."
+	@cd services/postgres && docker compose up -d
+	
+	@echo "⏳ Waiting for postgres to be ready..."
+	@./scripts/wait-for-it.sh localhost:5432 -t 60
+	
+	@echo "🔄 Setting up database..."
+	@$(MAKE) db-setup
+	@$(MAKE) db-migrate
+	
+	@echo "📱 Starting applications..."
+	@cd apps/api && docker compose up -d
+	@cd apps/web && docker compose up -d
+	
+	@echo "✅ Development environment is up"
 
-services-logs: ## Show logs from PostgreSQL and pgAdmin services
-	@echo "Showing PostgreSQL and pgAdmin service logs..."
-	$(DC_SERVICES) logs -f
+dev-down:
+	@echo "🔽 Stopping development environment..."
+	@cd apps/web && docker compose down
+	@cd apps/api && docker compose down
+	@cd services/postgres && docker compose down
+	@echo "✅ Development environment stopped"
 
-# Setup commands
-setup: env-setup install db-generate ## Complete initial setup (env files, dependencies, DB client)
+dev-clean:
+	@echo "🧹 Cleaning up development environment..."
+	@cd apps/web && docker compose down -v
+	@cd apps/api && docker compose down -v
+	@cd services/postgres && docker compose down -v
+	@rm -f .pgpass pgadmin_init.json 2>/dev/null || true
+	@docker network rm insomnia-wallet-network 2>/dev/null || true
+	@echo "✅ Development environment cleaned"
 
-env-setup: ## Create environment files from examples
-	@echo "Setting up environment files..."
-	@chmod +x scripts/setup-env.sh
-	@./scripts/setup-env.sh
+# Helper to check required dependencies
+check-dependencies:
+	@which docker >/dev/null 2>&1 || (echo "❌ Docker is required but not installed. Aborting." && exit 1)
+	@which docker-compose >/dev/null 2>&1 || (echo "❌ Docker Compose is required but not installed. Aborting." && exit 1)
 
-# Docker commands
-up: env-setup ## Start all services
-	@echo "Starting all services..."
-	$(DC) up -d
-
-down: ## Stop all services
-	@echo "Stopping all services..."
-	$(DC) down
-
-build: env-setup setup-dirs fix-permissions ## Build all services
-	@echo "Building all services..."
-	$(DC) build --no-cache
-
-logs: ## Show service logs
-	@echo "Showing logs..."
-	$(DC) logs -f
-
-ps: ## List running services
-	@echo "Showing running services..."
-	$(DC) ps
-
-clean: ## Remove all containers, volumes, and networks
-	@echo "Cleaning up..."
-	$(DC) down -v --remove-orphans
-	$(DC_SERVICES) down -v --remove-orphans
-	@rm -rf $(DOCKER_DATA_DIR)/*
-	@echo "Clean up complete"
-
-# Development specific commands
-dev-up: env-setup ## Start development environment
-	@echo "Starting development environment..."
-	make up ENV=development
-
-dev-build: env-setup ## Build development environment
-	@echo "Building development environment..."
-	make build ENV=development
-
-# Database commands
-db-migrate: ## Run database migrations
-	@echo "Running database migrations..."
-	cd packages/server && pnpm prisma migrate deploy
-
-db-generate: ## Generate Prisma client
-	@echo "Generating Prisma client..."
-	cd packages/server && pnpm prisma generate
-
-# Install dependencies
-install: ## Install all dependencies
-	@echo "Installing dependencies..."
-	pnpm install
+# Display help information
+help:
+	@echo "🔧 Available commands:"
+	@echo "  setup-env          	- Set up environment files from examples"
+	@echo "  configure-pgadmin  	- Configure pgAdmin settings"
+	@echo "  db-setup          	- Setup database schema"
+	@echo "  db-migrate        	- Run database migrations"
+	@echo "  db-migrate-dev       	- Run database migrations (dev)"
+	@echo "  services-up        	- Start all services"
+	@echo "  services-up-build  	- Rebuild and start all services"
+	@echo "  services-down      	- Stop all services"
+	@echo "  services-clean     	- Stop and clean all services (including volumes)"
+	@echo "  dev-up            	- Start complete development environment"
+	@echo "  dev-down          	- Stop development environment"
+	@echo "  dev-clean         	- Clean up development environment completely"
+	@echo "  help              	- Display this help message"

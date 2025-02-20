@@ -5,8 +5,8 @@ import { useAccount, useChainId } from 'wagmi'
 import { SiweModal } from './components/SiweModal'
 import { ConnectWalletSection } from '../../connect/ConnectWalletSection'
 import { useSiwe } from './hooks'
-import { trpc } from '@/server/client'
 import {LoadingScreen} from '../../common/LoadingScreen'
+import { trpc } from '@/server/client'
 
 export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { isConnected, address } = useAccount()

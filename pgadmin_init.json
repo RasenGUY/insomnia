@@ -1,1 +1,0 @@
-{"Servers":{"1":{"Name":"Insomnia Wallet DB","Group":"Servers","Host":"insomnia-wallet-postgres","Port":5432,"MaintenanceDB":"","Username":"","SSLMode":"prefer","PassFile":"/pgpass"}}}
