@@ -37,5 +37,5 @@ npm-debug.log*
 *.pem
 
 
-services/pgadmin_init.json
-services/.pgpass
+services/postgres/pgadmin_init.json
+services/postgres/.pgpass
