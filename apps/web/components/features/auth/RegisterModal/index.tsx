@@ -26,7 +26,6 @@ export const RegisterModal = ({
 
   const validateUsername = (value: string) => {
     try {
-      // Use the username schema directly, not the registration schema
       usernameSchema.parse(value);
       setValidationError('');
       return true;

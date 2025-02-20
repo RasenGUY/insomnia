@@ -7,11 +7,19 @@ import { ConnectWalletSection } from '../../connect/ConnectWalletSection'
 import { useSiwe } from './hooks'
 import {LoadingScreen} from '../../common/LoadingScreen'
 import { trpc } from '@/server/client'
+import { useRouter } from 'next/navigation'
 
 export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const { isConnected, address } = useAccount()
+  const { isConnected, address, isReconnecting, isConnecting } = useAccount()
+  const router = useRouter()
   const chainId = useChainId()
-  
+  console.log({
+    isConnected,
+    address,
+    isReconnecting,
+    chainId,
+    isConnecting
+  })
   const { 
     data: session,
     isLoading: isValidatingSession
@@ -23,34 +31,44 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
     }
   )
 
+  const { data: profile, isLoading: isCheckingProfile } = trpc.resolver.reverse.useQuery(
+    { address: address as string },
+    {
+      enabled: !!address && session?.isValid,
+      refetchOnWindowFocus: true,
+      retry: false,
+    }
+  )
+
   const { 
     verify, 
     isVerifying,
     verifyError
   } = useSiwe()
 
-  if (isValidatingSession) {
-    return <LoadingScreen />
+  if (isValidatingSession || isCheckingProfile || isReconnecting || isConnecting) {
+    return <LoadingScreen fullScreen/>
   }
 
-  if (!isConnected) {
-    return <ConnectWalletSection />
+  if(isConnected) {
+    if(!session?.isValid) {
+      return (
+        <SiweModal
+          isOpen={true}
+          onVerify={async () => {
+            if (address && chainId) {
+              await verify(address, chainId)
+            }
+          }}
+          isVerifying={isVerifying}
+          error={verifyError?.message}
+        />
+      )
+    } else {
+      if(!profile) router.push('/auth/register')
+    }
+  } else {
+    if(!isConnecting) return <ConnectWalletSection />
   }
-
-  if (isConnected && !session?.isValid) {
-    return (
-      <SiweModal
-        isOpen={true}
-        onVerify={async () => {
-          if (address && chainId) {
-            await verify(address, chainId)
-          }
-        }}
-        isVerifying={isVerifying}
-        error={verifyError?.message}
-      />
-    )
-  }
-
   return <>{children}</>
 }

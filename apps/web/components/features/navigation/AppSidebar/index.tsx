@@ -23,16 +23,6 @@ const items = [
     url: "/",
     icon: LayoutDashboard,
   },
-  {
-    title: "Tokens",
-    url: "/transfer",
-    icon: Coins,
-  },
-  {
-    title: "Nfts",
-    url: "/nfts",
-    icon: LucideImage,
-  },
 ]
 
 export default function AppSidebar({ children }: Readonly<{ children: React.ReactNode }>) {

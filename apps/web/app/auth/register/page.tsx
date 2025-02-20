@@ -21,13 +21,13 @@ export default function RegisterPage() {
 
   const register = trpc.auth.register.useMutation({
     onSuccess: () => {
-      router.push('/dashboard')
+      router.push('/')
     }
   })
 
   useEffect(() => {
     if (profile) {
-      router.push('/dashboard')
+      router.push('/')
     }
   }, [profile, router])
 
@@ -41,7 +41,7 @@ export default function RegisterPage() {
   }
 
   if (isCheckingProfile) {
-    return <LoadingScreen />
+    return <LoadingScreen fullScreen/>
   }
 
   return (

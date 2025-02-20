@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ResponseSuccessDto } from 'common/dtos/response-success.dto';
 import { ProfileDto } from 'modules/profile/profile.dto';
 
-export class ProfileResponseDto extends ResponseSuccessDto<ProfileDto> {
+export class ProfileResponseDto extends ResponseSuccessDto<ProfileDto | null> {
     @ApiProperty({
         description: 'Response success status',
         example: true
@@ -13,7 +13,7 @@ export class ProfileResponseDto extends ResponseSuccessDto<ProfileDto> {
         description: 'Response data containing profile information',
         type: ProfileDto
     })
-    data!: ProfileDto;
+    data!: ProfileDto | null;
 
     @ApiProperty({
         description: 'Response timestamp',

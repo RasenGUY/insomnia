@@ -17,18 +17,18 @@ export class ProfileService {
   }
 
   async findProfileByUsername(username: string){
-    const profile = await this.prisma.profile.findUniqueOrThrow({
+    const profile = await this.prisma.profile.findUnique({
       where: { username },
       include: {
         wallets: true
       }
     })
-    return ModelTransformer.toProfileDto(profile);
+    return ModelTransformer.toDto(profile, ProfileDto);
   }
 
   @HandlePrismaExceptions()
   async findProfileByWalletAddress(walletAddress: string) {
-    const profile = await this.prisma.profile.findFirstOrThrow({
+    const profile = await this.prisma.profile.findFirst({
       where: {
         wallets: {
           some: {

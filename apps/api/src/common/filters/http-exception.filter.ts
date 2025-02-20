@@ -30,17 +30,17 @@ import { ResponseTransformer } from 'common/transformers/response.transformer';
         message = 'Internal server error';
       }
   
-      this.logger.error({
-        status,
-        message,
-        stack: exception.stack,
-      });
       const error = {
         code: status,
+        stack: exception.stack,
         message,
       }
-      response
-        .status(status)
-        .json(ResponseTransformer.error(error));
+      if (response) {
+        response
+          .status(status)
+          .json(ResponseTransformer.error(error));
+        
+        throw error
+      }
     }
   }

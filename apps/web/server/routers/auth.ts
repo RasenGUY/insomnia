@@ -61,10 +61,6 @@ export const authRouter = router({
     const setCookieHeader = response.headers.get('set-cookie');
     if (setCookieHeader) {
       ctx.setSerialidedCookie(setCookieHeader);
-      console.log({
-        message: 'setSerialidedCookie verify',
-        setCookieHeader
-      })
     }
     
     const { data }: VerifyResponse = await response.json();
@@ -73,11 +69,15 @@ export const authRouter = router({
 
   register: publicProcedure
     .input(registrationSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
+        const cookies = ctx.req.headers.get('cookie');
         const response = await fetch(`${config.api.rest.url}/auth/register`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(cookies && { cookie: cookies }),
+          },
           credentials: 'include',
           body: JSON.stringify(input)
         })

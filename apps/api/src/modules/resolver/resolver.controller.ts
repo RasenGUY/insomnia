@@ -37,11 +37,8 @@ export class ResolverController {
         type: String
     })
     @ApiResponse(CommonSuccessResponsApiProps.OK(ProfileResponseDto))
-    @ApiResponse(CommonErrorResponsAPiProps.NotFound)
     @ApiResponse(CommonErrorResponsAPiProps.BadRequest)
-    async resolve(
-        @Param(ValidationPipe) params: UsernameParamDto
-    ) {
+    async resolve(@Param(ValidationPipe) params: UsernameParamDto) {
         const profile = await this.resolverService.resolveUsername(params.username);
         this.logger.log({
             message: 'resolve',
@@ -64,7 +61,6 @@ export class ResolverController {
         type: String
     })
     @ApiResponse(CommonSuccessResponsApiProps.OK(ProfileResponseDto))
-    @ApiResponse(CommonErrorResponsAPiProps.NotFound)
     @ApiResponse(CommonErrorResponsAPiProps.BadRequest)
     async reverse(@Param(ValidationPipe) params: WalletAddressParamDto) {
         const profile = await this.resolverService.resolveWallet(params.walletAddress);

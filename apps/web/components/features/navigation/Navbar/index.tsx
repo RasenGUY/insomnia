@@ -7,7 +7,7 @@ import ConnectButton from "components/features/wallet/ConnectButton";
 
 export default function Navbar() {
   return (
-    <NavigationMenu className="max-w-[unset] mx-auto mt-1 w-full px-4 py-4 sm:px-6 lg:px-8 flex justify-end">
+    <NavigationMenu className="absolute left-0 top-0 max-w-[unset] mx-auto mt-1 w-full px-4 py-4 sm:px-6 lg:px-8 flex justify-end">
       <ConnectButton/>
     </NavigationMenu>
   );

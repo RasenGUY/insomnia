@@ -30,8 +30,13 @@ export const resolverRouter = router({
     }))
     .query(async ({ input }) => {
       try {
-        const result: Response = await fetch(`${config.api.rest.url}/resolve/${input.address}`)
+        const result: Response = await fetch(`${config.api.rest.url}/resolve/reverse/${input.address}`)
         const { data }: ApiSuccessResponseBase<Profile> = await result.json();
+        console.log({
+          message: 'Reverse resolved profile',
+          data,
+          input,
+        })
         return data;
       } catch (error) {
         throw new TRPCError({

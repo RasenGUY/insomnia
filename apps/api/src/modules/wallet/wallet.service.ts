@@ -4,6 +4,7 @@ import { PrismaService } from "nestjs-prisma";
 import { WalletDto } from "./wallet.dto";
 import { ModelTransformer } from "common/transformers/model.transferformer";
 import { HandlePrismaExceptions } from "common/decorators/prisma-exceptions.decorator";
+import { getAddress } from "viem";
 
 @Injectable()
 export class WalletService {
@@ -22,7 +23,7 @@ export class WalletService {
     });
     const wallet = this.prisma.wallet.create({
       data: {
-        address: data.address,
+        address: getAddress(data.address), // store checksummed address
         profileId: data.profileId,
         isDefault: walletCount === 0,
         label: data.label ?? WalletLabel.POLYGON

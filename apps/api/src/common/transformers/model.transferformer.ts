@@ -6,11 +6,11 @@ import { ClassConstructor, plainToInstance } from "class-transformer";
 export class ModelTransformer {
 
   static toProfileDto(data: Profile) {
-    return this.toDto<Profile, ProfileDto>(data, ProfileDto); 
+    return this.toDto<Profile, ProfileDto | null>(data, ProfileDto); 
   }
 
   static toWalletDto(data: Wallet) {
-    return this.toDto<Wallet, WalletDto>(data, WalletDto); 
+    return this.toDto<Wallet, WalletDto | null>(data, WalletDto); 
   }
   
   static toDto<T, V>(data: T, dto: ClassConstructor<V>): V {
