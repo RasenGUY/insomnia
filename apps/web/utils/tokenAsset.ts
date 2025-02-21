@@ -1,9 +1,11 @@
 import { from, Observable, of, forkJoin } from 'rxjs';
 import { map, mergeMap, filter, toArray, catchError } from 'rxjs/operators';
-import {  AlchemyErc20TokenBalance, AlchemyTokenMetadata } from '@/lib/alchemy/types';
+import {  AlchemyErc20TokenBalance } from '@/lib/alchemy/types';
 import { AlchemyClient } from '@/lib/alchemy/client';
 import { Asset, AssetType } from '@/types/assets';
 import { WalletLabel } from '../types/wallet';
+import { getNativeToken } from '@/lib/constants/native-tokens';
+import { getSupportedChainByWalletLabel } from '@/lib/constants/supported-chains';
 
 export class TokenAssetMapper {
   private readonly alchemyClient: AlchemyClient; 
@@ -17,12 +19,95 @@ export class TokenAssetMapper {
    * @param address Wallet address to fetch tokens for
    * @returns Observable of Asset array
    */
-  getTokenAssets(address: string): Observable<Asset[]> {
-    return this.getFilteredTokenBalances(address).pipe(
-      mergeMap(tokenBalances => this.enrichWithMetadata(tokenBalances)),
-      map(tokens => this.filterTokensWithImages(tokens)),
+  getTokenAssets(address: string, walletLabel: WalletLabel): Observable<Asset[]> {
+    return from(this.alchemyClient.getTokenBalances(address)).pipe(
+      map(tokenBalances => this.mapToTokenAssets(tokenBalances, walletLabel)),
+      mergeMap(assets => this.enrichWithMetadata(assets)), 
+      map(assets => this.enrichWithFormattedBalances(assets)),
+      map(tokens => this.filterTokenAssets(tokens)),
+      mergeMap(filteredTokens => {
+        return this.getNativeAssets(address, walletLabel).pipe(
+          map(additionalTokens => [...filteredTokens, ...additionalTokens]),
+        )
+      }),
       catchError(error => {
         console.error('Error fetching token assets:', error);
+        return of([]);
+      })
+    );
+  }
+
+  getNativeAssets(address: string, walletLabel: WalletLabel): Observable<Asset[]>{
+    return from(this.alchemyClient.getEthBalance(address)).pipe(
+      map(balance => this.mapToNativeAssets(balance, walletLabel))
+    )
+  }
+
+  private mapToNativeAssets(
+    balance: bigint,
+    walletLabel: WalletLabel
+  ): Asset[] {
+    const chain = getSupportedChainByWalletLabel(walletLabel)
+    const nativeToken = getNativeToken(chain.id)
+    if(!nativeToken) return []
+    return this.enrichWithFormattedBalances([
+      {
+        type: AssetType.NATIVE,
+        contractAddress: nativeToken.address,
+        chainId: chain.id,
+        symbol: chain.nativeCurrency.symbol,
+        balance: balance.toString(),  
+        meta: {
+          decimals: chain.nativeCurrency.decimals,
+          logo: nativeToken.logoURI,
+          name: chain.nativeCurrency.name,
+          symbol: chain.nativeCurrency.symbol
+        }
+      }
+    ])
+  }
+
+  private mapToTokenAssets(tokenBalances: AlchemyErc20TokenBalance[], walletLabel: WalletLabel): Asset[] {
+    return tokenBalances.map(token => ({
+      type: AssetType.ERC20,
+      contractAddress: token.contractAddress,
+      balance: token.tokenBalance,
+      chainId: getSupportedChainByWalletLabel(walletLabel).id,
+      meta: undefined
+    }))
+  }
+
+  /**
+   * Enriches token balances with metadata
+   * @param tokenBalances Filtered token balances
+   * @returns Observable of partial Asset objects with metadata
+   */
+  private enrichWithMetadata(assets: Asset[]): Observable<Asset[]> { 
+    if (assets.length === 0) {
+      return of([]);
+    }
+
+    const metadataRequests = assets.map(token => {
+      return from(this.alchemyClient.getTokenMetadata(token.contractAddress)).pipe(
+        map(metadata => ({
+          ...token,
+          meta: {
+            ...metadata
+          }
+        })),
+        catchError(error => {
+          console.error(`Error fetching metadata for ${token.contractAddress}:`, error);
+          return of(null);
+        }),
+        toArray()
+      );
+    });
+
+    return forkJoin(metadataRequests).pipe(
+      map(results => results.flat()),
+      map(results => results.filter(result => result !== null) as Asset[]),
+      catchError(error => {
+        console.error('Error enriching with metadata:', error);
         return of([]);
       })
     );
@@ -33,15 +118,11 @@ export class TokenAssetMapper {
    * @param address Wallet address
    * @returns Observable of filtered token balances
    */
-  private getFilteredTokenBalances(address: string): Observable<AlchemyErc20TokenBalance[]> {
-    return from(this.alchemyService.getTokenBalances(address)).pipe(
-      mergeMap(tokenBalances => from(tokenBalances)),
-      filter(token => this.hasNonZeroBalance(token)),
-      toArray(),
-      catchError(error => {
-        console.error('Error filtering token balances:', error);
-        return of([]);
-      })
+  private filterTokenAssets(tokenAssets: Asset[]): Observable<Asset[]> {
+    return from(tokenAssets).pipe(
+      filter(asset => this.hasNonZeroBalance(asset)), 
+      filter(asset => this.hasNonEmptyLogos(asset)),
+      toArray()
     );
   }
 
@@ -50,61 +131,32 @@ export class TokenAssetMapper {
    * @param token Token balance to check
    * @returns Boolean indicating if balance is greater than 0
    */
-  private hasNonZeroBalance(token: AlchemyErc20TokenBalance): boolean {
-    const balanceHex = token.tokenBalance;
-    // Convert hex to decimal, assuming it's a hex string that includes '0x'
-    const balanceBigInt = BigInt(balanceHex);
-    
-    // Minimum threshold (0.001 tokens in wei format)
-    // For simplicity, we're assuming a common 18 decimals for ERC20 tokens
-    // In a real implementation, we would get the actual decimals from metadata
+  private hasNonZeroBalance(asset: Asset): boolean {
+    const balanceBigInt = BigInt(asset.balance);
     const threshold = BigInt(1000000000000000); // 0.001 * 10^18
-    
     return balanceBigInt > threshold;
   }
-
+  
   /**
-   * Enriches token balances with metadata
-   * @param tokenBalances Filtered token balances
-   * @returns Observable of partial Asset objects with metadata
+   * Checks if token has balance greater than 0 (considering up to 3 decimals)
+   * @param token Token balance to check
+   * @returns Boolean indicating if balance is greater than 0
    */
-  private enrichWithMetadata(tokenBalances: AlchemyErc20TokenBalance[]): Observable<Partial<Asset>[]> {
-    if (tokenBalances.length === 0) {
-      return of([]);
-    }
-
-    const metadataRequests = tokenBalances.map(token => {
-      return from(this.alchemyService.getTokenMetadata(token.contractAddress)).pipe(
-        map(metadata => ({
-          contractAddress: token.contractAddress,
-          balance: token.tokenBalance,
-          metadata
-        })),
-        catchError(error => {
-          console.error(`Error fetching metadata for ${token.contractAddress}:`, error);
-          return of(null);
-        })
-      );
-    });
-
-    return forkJoin(metadataRequests).pipe(
-      map(results => results.filter(Boolean)),
-      catchError(error => {
-        console.error('Error enriching with metadata:', error);
-        return of([]);
-      })
-    );
+  private hasNonEmptyLogos(asset: Asset): boolean {
+    return (asset.meta?.logo as string).length > 0;
   }
 
+
   /**
-   * Filters tokens to only include those with image URLs
-   * @param tokens Partial Asset objects with metadata
-   * @returns Array of partial Asset objects with images
+   * Maps the enriched token data to an Asset object
+   * @param token Partial Asset with metadata
+   * @returns Complete Asset object
    */
-  private filterTokensWithImages(tokens: Partial<Asset>[]): Asset[] {
-    return tokens
-      .filter(token => token.metadata?.logo !== null && token.metadata?.logo !== undefined)
-      .map(token => this.mapToAsset(token));
+  private enrichWithFormattedBalances(assets: Asset[]): Asset[] {
+    return assets.map(asset => ({
+      ...asset,
+      balance: this.formatBalance(asset)
+    }))
   }
 
   /**
@@ -112,35 +164,13 @@ export class TokenAssetMapper {
    * @param token Partial Asset with metadata
    * @returns Complete Asset object
    */
-  private mapToAsset(token: any): Asset {
-    // Check if it's a native token (can be identified by a special address)
-    const isNative = token.contractAddress === '0x0000000000000000000000000000000000000000';
-    
-    // Format balance from hex string (wei) to decimal string
-    // For a real implementation, we would use the actual decimals from metadata
+  private formatBalance(token: Asset): string {
     const balanceWei = BigInt(token.balance);
-    const decimals = token.metadata.decimals || 18;
+    const decimals = token.meta?.decimals as number;
     const divisor = BigInt(10) ** BigInt(decimals);
     const balanceDecimal = Number(balanceWei) / Number(divisor);
     const formattedBalance = balanceDecimal.toFixed(6);
-
-    return {
-      type: isNative ? AssetType.NATIVE : AssetType.ERC20,
-      symbol: token.metadata.symbol,
-      name: token.metadata.name,
-      balance: formattedBalance,
-      imageUrl: token.metadata.logo,
-      network: WalletLabel.POLYGON,
-      networkImageUrl: isNative 
-        ? "https://static.cx.metamask.io/api/v1/tokenIcons/10/0x0000000000000000000000000000000000000000.png"
-        : undefined,
-      meta: {
-        decimals: String(token.metadata.decimals),
-        logo: token.metadata.logo,
-        name: token.metadata.name,
-        symbol: token.metadata.symbol
-      }
-    };
+    return formattedBalance
   }
 
   /**
@@ -149,7 +179,7 @@ export class TokenAssetMapper {
    * @returns Promise of Asset array
    */
   static async map(address: string): Promise<Asset[]> {
-    const mapper = new AlchemyAssetMapper();
+    const mapper = new TokenAssetMapper();
     return new Promise((resolve, reject) => {
       mapper.getTokenAssets(address).subscribe({
         next: (assets) => resolve(assets),

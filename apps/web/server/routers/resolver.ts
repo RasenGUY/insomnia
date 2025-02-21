@@ -2,7 +2,7 @@ import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { config } from '@/config/configServer';
-import { ApiSuccessResponseBase } from '@/types/api';
+import { ApiSuccessResponseBase } from '@/lib/fetch/types';
 import { Profile } from '@/types/profle';
 
 export const resolverRouter = router({

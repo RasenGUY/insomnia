@@ -1,3 +1,5 @@
+import { WalletLabel } from "@/lib/constants/supported-chains";
+
 export interface Wallet {
   address: string;
   label: WalletLabel;
@@ -7,8 +9,5 @@ export interface Wallet {
   updatedAt: string;
 }
 
-export enum WalletLabel {
-  POLYGON = 0,
-  ETHEREUM = 1,
-  BSC = 2,
-}
+export { WalletLabel };
+
