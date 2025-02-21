@@ -13,13 +13,6 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
   const { isConnected, address, isReconnecting, isConnecting } = useAccount()
   const router = useRouter()
   const chainId = useChainId()
-  console.log({
-    isConnected,
-    address,
-    isReconnecting,
-    chainId,
-    isConnecting
-  })
   const { 
     data: session,
     isLoading: isValidatingSession

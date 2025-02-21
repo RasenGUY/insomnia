@@ -1,42 +1,68 @@
+import { ApiSuccessResponseBase } from "./api";
+import { WalletLabel } from "./wallet";
+
 export enum AssetType {
-  ERC20 = "ERC20",
-  ERC721 = "ERC721",
-  ERC1155 = "ERC1155",
-  NATIVE = "NATIVE"
+  ERC20 = "erc20",
+  ERC721 = "erc721",
+  ERC1155 = "erc1155",
+  NATIVE = "native"
 }
 
+
+export interface AlchemyErc20TokenBalance {
+  contractAddress: string;
+  tokenBalance: string;
+}
+
+export interface AlchemyErc20TokenBalanceResult {
+  address: string;
+  tokenBalances: AlchemyErc20TokenBalance[]; 
+}
+
+export interface AlchemyTokenMetadata {
+  decimals: number,
+  logo: string | null,
+  name: string,
+  symbol: string
+}
+
+export interface GetTokenBalancesResponse extends ApiSuccessResponseBase<AlchemyErc20TokenBalance[]> {} 
+export interface GetTokenMetadataRessponse extends ApiSuccessResponseBase<AlchemyTokenMetadata> {}  
+
+// Sample tokens data
 export interface Asset {
-  id: string;
   type: AssetType;
   symbol: string;
   name: string;
-  balance: string;
-  balanceUsd?: string;
-  imageUrl: string;
-  networkImageUrl?: string;
-  contractAddress?: string;
   tokenId?: string;
+  balance: string;
+  imageUrl?: string;
+  network: number;
+  networkImageUrl?: string;
+  meta?: {
+    decimals: string;
+    logo: string;
+    name: string;
+    symbol: string;
+  }
 }
 
-// Sample tokens data
 export const tokens: Asset[] = [
   { 
-    id: "eth-1", 
     type: AssetType.NATIVE,
+    network: WalletLabel.POLYGON,
     symbol: "ETH", 
     name: "Ether",
     balance: "0.033",
-    balanceUsd: "90.62",
     imageUrl: "https://static.cx.metamask.io/api/v1/tokenIcons/1/0x0000000000000000000000000000000000000000.png",
     networkImageUrl: "https://static.cx.metamask.io/api/v1/tokenIcons/10/0x0000000000000000000000000000000000000000.png"
   },
   {
-    id: "usdc-1",
     type: AssetType.ERC20,
+    network: WalletLabel.POLYGON,
     symbol: "USDC",
     name: "USD Coin",
     balance: "1,000.00",
-    balanceUsd: "1,000.00",
     imageUrl: "https://static.cx.metamask.io/api/v1/tokenIcons/1/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
   }
 ];
@@ -44,23 +70,21 @@ export const tokens: Asset[] = [
 // Sample NFTs data
 export const nfts: Asset[] = [
   {
-    id: "bayc-1234",
+    network: WalletLabel.POLYGON,
     type: AssetType.ERC721,
     symbol: "BAYC",
     name: "Bored Ape #1234",
     balance: "1",
     imageUrl: "/api/placeholder/200/200",
-    contractAddress: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
     tokenId: "1234"
   },
   {
-    id: "doodle-5678",
     type: AssetType.ERC1155,
+    network: WalletLabel.POLYGON,
     symbol: "DOODLE",
     name: "Doodle #5678",
     balance: "3",
     imageUrl: "/api/placeholder/200/200",
-    contractAddress: "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
     tokenId: "5678"
   }
 ];

@@ -12,8 +12,14 @@ export const resolverRouter = router({
     }))
     .query(async ({ input }) => {
       try {
-        const result: Response = await fetch(`${config.api.rest.url}/resolve/${input.username}`)
-        const { data }: ApiSuccessResponseBase<Profile> = await result.json();
+        const response: Response = await fetch(`${config.api.rest.url}/resolve/${input.username}`)
+        const { data }: ApiSuccessResponseBase<Profile> = await response.json();
+        if(!response.ok) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to resolve profile',
+          });
+        }
         return data;
       } catch (error) {
         throw new TRPCError({
@@ -30,18 +36,19 @@ export const resolverRouter = router({
     }))
     .query(async ({ input }) => {
       try {
-        const result: Response = await fetch(`${config.api.rest.url}/resolve/reverse/${input.address}`)
-        const { data }: ApiSuccessResponseBase<Profile> = await result.json();
-        console.log({
-          message: 'Reverse resolved profile',
-          data,
-          input,
-        })
+        const response: Response = await fetch(`${config.api.rest.url}/resolve/reverse/${input.address}`)
+        const { data }: ApiSuccessResponseBase<Profile> = await response.json();
+        if(!response.ok) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to resolve profile',
+          });
+        }
         return data;
       } catch (error) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to validate session',
+          message: 'Failed to resolve profile',
           cause: error,
         });
       }

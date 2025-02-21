@@ -7,10 +7,11 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { AssetSelector } from "./AssetSelector";
 import { Asset, AssetType } from "@/types/assets";
-import { FromAddressSelector } from "./FromAddressSelector";
 import { RecipientInput } from "./RecipientInput";
 import { AmountInput } from "./AmountInput";
 import { NFTDetails } from "./NFTDetails";
+import { Input } from "@workspace/ui/components/input";
+import { Address } from "viem";
 
 // Form validation schema using zod
 const sendFormSchema = z.object({
@@ -49,15 +50,20 @@ const sendFormSchema = z.object({
 });
 
 type SendFormValues = z.infer<typeof sendFormSchema>;
+interface SendTransactionFormProps {  
+  fromAddress: Address | undefined;
+}
 
-export default function SendTransactionForm() {
+export default function SendTransactionForm({
+  fromAddress
+}: Readonly<SendTransactionFormProps>) {
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   
-  const { control, handleSubmit, watch, setValue, formState: { errors, isValid } } = useForm<SendFormValues>({
+  const { register, control, handleSubmit, watch, setValue, formState: { errors, isValid }, getValues } = useForm<SendFormValues>({  
     resolver: zodResolver(sendFormSchema),
     mode: "onChange",
     defaultValues: {
-      fromAddress: "0xC2FD...867A44", // Pre-populate with connected wallet
+      fromAddress: fromAddress,
       toAddress: "",
       asset: null,
       amount: ""
@@ -90,17 +96,18 @@ export default function SendTransactionForm() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="p-0 space-y-6">
           {/* From Address Selector */}
-          <Controller
-            name="fromAddress"
-            control={control}
-            render={({ field }) => (
-              <FromAddressSelector
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.fromAddress?.message}
+          <div className="space-y-2">
+            <p className="font-semibold">From Address</p>
+            <div className="relative">
+              <Input
+                disabled={true}
+                {...register('fromAddress')}
+                value={getValues('fromAddress')}
+                defaultValue={fromAddress}
+                className={"h-12 bg-transparent"}
               />
-            )}
-          />
+            </div>
+          </div>
           
           {/* To Address Input */}
           <Controller

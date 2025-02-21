@@ -1,4 +1,4 @@
-import { ApiSuccessResponseBase } from "./api";
+import { ApiSuccessResponseBase } from "@/lib/fetch/types";
 import { Profile } from "./profle";
 import { Session } from "./session";
 

@@ -6,7 +6,7 @@ interface RecipientInputProps {
   error?: string;
 }
 
-export function RecipientInput({ value, onChange, error }: RecipientInputProps) {
+export function RecipientInput({ value, onChange, error }: Readonly<RecipientInputProps>) {
   return (
     <div className="space-y-2">
       <p className="font-semibold">Send to</p>
