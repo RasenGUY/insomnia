@@ -150,6 +150,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^4.1.0
+        version: 4.1.0(react-hook-form@7.54.2(react@19.0.0))
       '@tanstack/react-query':
         specifier: ^5.66.0
         version: 5.66.0(react@19.0.0)
@@ -201,6 +204,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
+      react-hook-form:
+        specifier: ^7.54.2
+        version: 7.54.2(react@19.0.0)
       siwe:
         specifier: ^3.0.0
         version: 3.0.0(ethers@6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10))
@@ -214,7 +220,7 @@ importers:
         specifier: ^2.14.11
         version: 2.14.11(@tanstack/query-core@5.66.0)(@tanstack/react-query@5.66.0(react@19.0.0))(@types/react@18.3.0)(bufferutil@4.0.9)(immer@10.1.1)(react@19.0.0)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.23.0(bufferutil@4.0.9)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.1))(zod@3.24.1)
       zod:
-        specifier: ^3.24.1
+        specifier: ^3.23.8
         version: 3.24.1
       zustand:
         specifier: ^5.0.3
@@ -300,6 +306,9 @@ importers:
       '@radix-ui/react-scroll-area':
         specifier: ^1.2.3
         version: 1.2.3(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-select':
+        specifier: ^2.1.6
+        version: 2.1.6(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@radix-ui/react-separator':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -722,6 +731,11 @@ packages:
 
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
+
+  '@hookform/resolvers@4.1.0':
+    resolution: {integrity: sha512-fX/uHKb+OOCpACLc6enuTQsf0ZpRrKbeBBPETg5PCPLCIYV6osP2Bw6ezuclM61lH+wBF9eXcuC0+BFh9XOEnQ==}
+    peerDependencies:
+      react-hook-form: ^7.0.0
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -1744,6 +1758,19 @@ packages:
 
   '@radix-ui/react-scroll-area@1.2.3':
     resolution: {integrity: sha512-l7+NNBfBYYJa9tNqVcP2AGvxdE3lmE6kFTBXdvHgUaZuy+4wGCL1Cl2AfaR7RKyimj7lZURGLwFO59k4eBnDJQ==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
+  '@radix-ui/react-select@2.1.6':
+    resolution: {integrity: sha512-T6ajELxRvTuAMWH0YmRJ1qez+x4/7Nq7QIx7zJ0VK3qaEWdnWpNbEDnmWldG1zBDwqrLy5aLMUWcoGirVj5kMg==}
     peerDependencies:
       '@types/react': '*'
       '@types/react-dom': '*'
@@ -2990,6 +3017,9 @@ packages:
 
   caniuse-lite@1.0.30001688:
     resolution: {integrity: sha512-Nmqpru91cuABu/DTCXbM2NSRHzM2uVHfPnhJ/1zEAJx/ILBRVmz3pzH4N7DZqbdG0gWClsCC05Oj0mJ/1AWMbA==}
+
+  caniuse-lite@1.0.30001700:
+    resolution: {integrity: sha512-2S6XIXwaE7K7erT8dY+kLQcpa5ms63XlRkMkReXjle+kf6c5g38vyMl+Z5y8dSxOFDhcFe+nxnn261PLxBSQsQ==}
 
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -5469,6 +5499,12 @@ packages:
     peerDependencies:
       react: '>=16.13.1'
 
+  react-hook-form@7.54.2:
+    resolution: {integrity: sha512-eHpAUgUjWbZocoQYUHposymRb4ZP6d0uwUnooL2uOybA9/3tPUvoAKqEWK1WaSiTxxOfTpffNZP7QwlnM3/gEg==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -7203,6 +7239,11 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
 
+  '@hookform/resolvers@4.1.0(react-hook-form@7.54.2(react@19.0.0))':
+    dependencies:
+      caniuse-lite: 1.0.30001700
+      react-hook-form: 7.54.2(react@19.0.0)
+
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -8377,6 +8418,35 @@ snapshots:
       '@radix-ui/react-use-layout-effect': 1.1.0(@types/react@18.3.0)(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
+    optionalDependencies:
+      '@types/react': 18.3.0
+      '@types/react-dom': 18.3.1
+
+  '@radix-ui/react-select@2.1.6(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@radix-ui/number': 1.1.0
+      '@radix-ui/primitive': 1.1.1
+      '@radix-ui/react-collection': 1.1.2(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-compose-refs': 1.1.1(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-context': 1.1.1(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-direction': 1.1.0(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-dismissable-layer': 1.1.5(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-focus-guards': 1.1.1(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-focus-scope': 1.1.2(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-id': 1.1.0(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-popper': 1.2.2(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-portal': 1.1.4(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-primitive': 2.0.2(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-slot': 1.1.2(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-use-callback-ref': 1.1.0(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-use-controllable-state': 1.1.0(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-use-layout-effect': 1.1.0(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-use-previous': 1.1.0(@types/react@18.3.0)(react@19.0.0)
+      '@radix-ui/react-visually-hidden': 1.1.2(@types/react-dom@18.3.1)(@types/react@18.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      aria-hidden: 1.2.4
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+      react-remove-scroll: 2.6.3(@types/react@18.3.0)(react@19.0.0)
     optionalDependencies:
       '@types/react': 18.3.0
       '@types/react-dom': 18.3.1
@@ -10142,6 +10212,8 @@ snapshots:
   camelize@1.0.1: {}
 
   caniuse-lite@1.0.30001688: {}
+
+  caniuse-lite@1.0.30001700: {}
 
   chalk@2.4.2:
     dependencies:
@@ -13045,6 +13117,10 @@ snapshots:
   react-error-boundary@5.0.0(react@19.0.0):
     dependencies:
       '@babel/runtime': 7.26.7
+      react: 19.0.0
+
+  react-hook-form@7.54.2(react@19.0.0):
+    dependencies:
       react: 19.0.0
 
   react-is@16.13.1: {}

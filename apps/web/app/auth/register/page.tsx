@@ -15,7 +15,6 @@ export default function RegisterPage() {
     { address: address as string },
     {
       enabled: !!address,
-      retry: false,
     }
   )
 
@@ -29,7 +28,7 @@ export default function RegisterPage() {
     if (profile) {
       router.push('/')
     }
-  }, [profile, router])
+  }, [profile, router, address])
 
   const handleRegister = async (username: string) => {
     if (address) {

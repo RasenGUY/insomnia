@@ -81,6 +81,12 @@ export const authRouter = router({
           credentials: 'include',
           body: JSON.stringify(input)
         })
+        if (!response.ok) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to register',
+          });
+        }
         const { data }: RegistrationResponse = await response.json()
         return data;
       } catch (error) {

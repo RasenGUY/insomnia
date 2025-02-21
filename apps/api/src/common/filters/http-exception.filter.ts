@@ -35,12 +35,8 @@ import { ResponseTransformer } from 'common/transformers/response.transformer';
         stack: exception.stack,
         message,
       }
-      if (response) {
-        response
-          .status(status)
-          .json(ResponseTransformer.error(error));
-        
-        throw error
-      }
+      response
+        .status(status)
+        .json(ResponseTransformer.error(error));
     }
   }

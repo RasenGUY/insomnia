@@ -1,4 +1,4 @@
-import { Coins, Image as LucideImage, LayoutDashboard } from "lucide-react"
+import { Send, LayoutDashboard } from "lucide-react"
 import Image from "next/image"
 import Logo from "public/images/logo.svg"
 
@@ -15,13 +15,18 @@ import {
   SidebarRail,
 } from "@workspace/ui/components/sidebar"
 import Navbar from "../Navbar"
+import Link from "next/link"
 
-// Menu items.
 const items = [
   {
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Send",
+    url: "/send",
+    icon: Send,
   },
 ]
 
@@ -41,10 +46,10 @@ export default function AppSidebar({ children }: Readonly<{ children: React.Reac
                 {items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
+                      <Link href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -54,11 +59,10 @@ export default function AppSidebar({ children }: Readonly<{ children: React.Reac
         </SidebarContent>
         <SidebarRail />
       </Sidebar>
-      <div className="w-full"> {/* sidebar container */}
+      <div className="w-full"> 
         <Navbar />
         <main className="w-full">
           {children}
-          {/* <section>Hi</section> */}
         </main>
     </div>
     </>
