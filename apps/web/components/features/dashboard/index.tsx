@@ -7,9 +7,13 @@ import {
 
 import { TokenTabsContent } from "./TokenTabsContent";
 import { NFTTabsContent } from "./NFTTabsContent";
+import { Asset } from '@/types/assets';
 
-const PortfolioView = () => {
+interface PortfolioViewProps {
+  tokenAssets: Asset[];
+}
 
+const PortfolioView: React.FC<Readonly<PortfolioViewProps>> = ({ tokenAssets }) => {
   return (
     <div className="w-full p-6"> 
       <Tabs defaultValue="tokens">
@@ -23,7 +27,7 @@ const PortfolioView = () => {
             NFTs
           </TabsTrigger>
         </TabsList>
-        <TokenTabsContent />
+        <TokenTabsContent assets={tokenAssets} />
         <NFTTabsContent />
       </Tabs>
     </div>

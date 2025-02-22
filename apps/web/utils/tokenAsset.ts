@@ -1,5 +1,5 @@
 import { from, Observable, of, forkJoin } from 'rxjs';
-import { map, mergeMap, filter, toArray, catchError } from 'rxjs/operators';
+import { map, mergeMap, filter, toArray, catchError, switchMap } from 'rxjs/operators';
 import {  AlchemyErc20TokenBalance } from '@/lib/alchemy/types';
 import { AlchemyClient } from '@/lib/alchemy/client';
 import { Asset, AssetType } from '@/types/assets';
@@ -14,18 +14,13 @@ export class TokenAssetMapper {
     this.alchemyClient = new AlchemyClient();
   }
 
-  /**
-   * Maps token balances and metadata to Asset objects
-   * @param address Wallet address to fetch tokens for
-   * @returns Observable of Asset array
-   */
   getTokenAssets(address: string, walletLabel: WalletLabel): Observable<Asset[]> {
     return from(this.alchemyClient.getTokenBalances(address)).pipe(
       map(tokenBalances => this.mapToTokenAssets(tokenBalances, walletLabel)),
       mergeMap(assets => this.enrichWithMetadata(assets)), 
       map(assets => this.enrichWithFormattedBalances(assets)),
-      map(tokens => this.filterTokenAssets(tokens)),
-      mergeMap(filteredTokens => {
+      mergeMap(tokens => this.filterTokenAssets(tokens)),
+      switchMap((filteredTokens: Asset[]) => {
         return this.getNativeAssets(address, walletLabel).pipe(
           map(additionalTokens => [...filteredTokens, ...additionalTokens]),
         )
@@ -77,11 +72,7 @@ export class TokenAssetMapper {
     }))
   }
 
-  /**
-   * Enriches token balances with metadata
-   * @param tokenBalances Filtered token balances
-   * @returns Observable of partial Asset objects with metadata
-   */
+
   private enrichWithMetadata(assets: Asset[]): Observable<Asset[]> { 
     if (assets.length === 0) {
       return of([]);
@@ -113,11 +104,7 @@ export class TokenAssetMapper {
     );
   }
 
-  /**
-   * Gets token balances and filters for non-zero balances
-   * @param address Wallet address
-   * @returns Observable of filtered token balances
-   */
+
   private filterTokenAssets(tokenAssets: Asset[]): Observable<Asset[]> {
     return from(tokenAssets).pipe(
       filter(asset => this.hasNonZeroBalance(asset)), 
@@ -126,32 +113,16 @@ export class TokenAssetMapper {
     );
   }
 
-  /**
-   * Checks if token has balance greater than 0 (considering up to 3 decimals)
-   * @param token Token balance to check
-   * @returns Boolean indicating if balance is greater than 0
-   */
   private hasNonZeroBalance(asset: Asset): boolean {
     const balanceBigInt = BigInt(asset.balance);
     const threshold = BigInt(1000000000000000); // 0.001 * 10^18
     return balanceBigInt > threshold;
   }
-  
-  /**
-   * Checks if token has balance greater than 0 (considering up to 3 decimals)
-   * @param token Token balance to check
-   * @returns Boolean indicating if balance is greater than 0
-   */
+    
   private hasNonEmptyLogos(asset: Asset): boolean {
     return (asset.meta?.logo as string).length > 0;
   }
 
-
-  /**
-   * Maps the enriched token data to an Asset object
-   * @param token Partial Asset with metadata
-   * @returns Complete Asset object
-   */
   private enrichWithFormattedBalances(assets: Asset[]): Asset[] {
     return assets.map(asset => ({
       ...asset,
@@ -159,11 +130,6 @@ export class TokenAssetMapper {
     }))
   }
 
-  /**
-   * Maps the enriched token data to an Asset object
-   * @param token Partial Asset with metadata
-   * @returns Complete Asset object
-   */
   private formatBalance(token: Asset): string {
     const balanceWei = BigInt(token.balance);
     const decimals = token.meta?.decimals as number;
@@ -173,15 +139,10 @@ export class TokenAssetMapper {
     return formattedBalance
   }
 
-  /**
-   * Static method to map assets (convenience wrapper)
-   * @param data Address to fetch assets for
-   * @returns Promise of Asset array
-   */
-  static async map(address: string): Promise<Asset[]> {
+  static async map(address: string, walletLabel: WalletLabel): Promise<Asset[]> {
     const mapper = new TokenAssetMapper();
     return new Promise((resolve, reject) => {
-      mapper.getTokenAssets(address).subscribe({
+      mapper.getTokenAssets(address, walletLabel).subscribe({
         next: (assets) => resolve(assets),
         error: (err) => reject(err)
       });
