@@ -32,7 +32,7 @@ export const config: Config = {
   },
   wallet: {
     defaultNetwork: getChain(
-      getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_WALLET_NETWORK', 'localhost'),
+      getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_WALLET_NETWORK', 'polygon'),
     ),
     walletConnectId: getRequiredEnvVar('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID', '#'),
     providerUrl: [
