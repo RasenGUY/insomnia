@@ -59,9 +59,9 @@ export default function AppSidebar({ children }: Readonly<{ children: React.Reac
         </SidebarContent>
         <SidebarRail />
       </Sidebar>
-      <div className="w-full"> 
+      <div className="w-full relative"> 
         <Navbar />
-        <main className="w-full">
+        <main className="w-full pt-16">
           {children}
         </main>
     </div>

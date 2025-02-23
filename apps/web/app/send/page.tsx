@@ -5,7 +5,7 @@ import { useAccount } from "wagmi";
 const SendPage = () => {
   const { address } = useAccount();
   return (
-    <section className="w-full flex justify-center items-center min-h-screen">
+    <section className="mt-[3rem] w-full flex justify-center items-center">
       <SendTransactionForm fromAddress={address}/>
     </section>
   );

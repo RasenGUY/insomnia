@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@workspace/ui/components/button';
 import type { ButtonProps } from '@workspace/ui/components/button';
 import { ConnectKitButton } from 'connectkit';

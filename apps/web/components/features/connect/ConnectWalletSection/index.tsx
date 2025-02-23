@@ -4,7 +4,7 @@ import ConnectButton from 'components/features/wallet/ConnectButton';
 
 export function ConnectWalletSection() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center">
+    <div className="my-[10%] w-full flex items-center justify-center">
       <div className="p-8 rounded-lg shadow-lg max-w-md w-full border-[1px] border-secondary-500">
         <div className="flex flex-col items-center space-y-6">
           <h1 className="text-3xl font-bold text-gray-100">Insomnia Wallet</h1>
