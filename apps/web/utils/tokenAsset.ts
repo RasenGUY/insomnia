@@ -1,28 +1,46 @@
-import { from, Observable, of, forkJoin } from 'rxjs';
-import { map, mergeMap, filter, toArray, catchError, switchMap } from 'rxjs/operators';
-import {  AlchemyErc20TokenBalance, AlchemyTokenPriceData } from '@/lib/alchemy/types';
-import { AlchemyClient } from '@/lib/alchemy/client';
-import { Asset, AssetType } from '@/types/assets';
+import { 
+  from, 
+  Observable, 
+  of, 
+  forkJoin 
+} from 'rxjs';
+import { 
+  map, 
+  mergeMap, 
+  filter, 
+  toArray, 
+  catchError, 
+  switchMap 
+} from 'rxjs/operators';
+import {  
+  AlchemyErc20TokenBalance, 
+  AlchemyTokenPriceData 
+} from '@/lib/alchemy/types';
+import { AlchemyTokenClient } from '@/lib/alchemy/tokenClient';
+import { TokenAsset, AssetType } from '@/types/assets';
 import { WalletLabel } from '../types/wallet';
 import { getNativeToken } from '@/lib/constants/native-tokens';
-import { getSupportedChainByWalletLabel, getSupportedNetworkByWalletLabel } from '@/lib/constants/supported-chains';
+import { 
+  getSupportedChainByWalletLabel, 
+  getSupportedNetworkByWalletLabel 
+} from '@/lib/constants/supported-chains';
 import { parseUnits } from 'viem';
 import { groupBy, flatten } from 'lodash';
 
 export class TokenAssetMapper {
-  private readonly alchemyClient: AlchemyClient;
+  private readonly alchemyClient: AlchemyTokenClient;
   
   constructor() {
-    this.alchemyClient = new AlchemyClient();
+    this.alchemyClient = new AlchemyTokenClient();
   }
 
-  getTokenAssets(address: string, walletLabel: WalletLabel): Observable<Asset[]> {
+  getTokenAssets(address: string, walletLabel: WalletLabel): Observable<TokenAsset[]> {
     return from(this.alchemyClient.getTokenBalances(address)).pipe(
       map(tokenBalances => this.mapToTokenAssets(tokenBalances, walletLabel)),
       mergeMap(assets => this.enrichWithMetadata(assets)), 
       map(assets => this.enrichWithFormattedBalances(assets)),
       mergeMap(tokens => this.filterTokenAssets(tokens)),
-      switchMap((filteredTokens: Asset[]) => {
+      switchMap((filteredTokens: TokenAsset[]) => {
         return this.getNativeAssets(address, walletLabel).pipe(
           map(additionalTokens => [...filteredTokens, ...additionalTokens]),
         )
@@ -35,7 +53,7 @@ export class TokenAssetMapper {
     );
   }
 
-  getNativeAssets(address: string, walletLabel: WalletLabel): Observable<Asset[]>{
+  getNativeAssets(address: string, walletLabel: WalletLabel): Observable<TokenAsset[]>{
     return from(this.alchemyClient.getEthBalance(address)).pipe(
       map(balance => this.mapToNativeAssets(balance, walletLabel))
     )
@@ -44,7 +62,7 @@ export class TokenAssetMapper {
   private mapToNativeAssets(
     balance: bigint,
     walletLabel: WalletLabel
-  ): Asset[] {
+  ): TokenAsset[] {
     const chain = getSupportedChainByWalletLabel(walletLabel)
     const nativeToken = getNativeToken(chain.id)
     if(!nativeToken) return []
@@ -53,7 +71,6 @@ export class TokenAssetMapper {
         type: AssetType.NATIVE,
         contractAddress: nativeToken.address,
         chainId: chain.id,
-        symbol: chain.nativeCurrency.symbol,
         balance: balance.toString(),  
         meta: {
           decimals: chain.nativeCurrency.decimals,
@@ -65,7 +82,7 @@ export class TokenAssetMapper {
     ])
   }
 
-  private mapToTokenAssets(tokenBalances: AlchemyErc20TokenBalance[], walletLabel: WalletLabel): Asset[] {
+  private mapToTokenAssets(tokenBalances: AlchemyErc20TokenBalance[], walletLabel: WalletLabel): TokenAsset[] {
     return tokenBalances.map(token => ({
       type: AssetType.ERC20,
       contractAddress: token.contractAddress,
@@ -75,7 +92,7 @@ export class TokenAssetMapper {
     }))
   }
 
-  private enrichWithMetadata(assets: Asset[]): Observable<Asset[]> { 
+  private enrichWithMetadata(assets: TokenAsset[]): Observable<TokenAsset[]> { 
     if (assets.length === 0) {
       return of([]);
     }
@@ -98,7 +115,7 @@ export class TokenAssetMapper {
 
     return forkJoin(metadataRequests).pipe(
       map(results => results.flat()),
-      map(results => results.filter(result => result !== null) as Asset[]),
+      map(results => results.filter(result => result !== null) as TokenAsset[]),
       catchError(error => {
         console.error('Error enriching with metadata:', error);
         return of([]);
@@ -106,7 +123,7 @@ export class TokenAssetMapper {
     );
   }
 
-  private enrichWithPrices(assets: Asset[], walletLabel: WalletLabel): Observable<Asset[]> {
+  private enrichWithPrices(assets: TokenAsset[], walletLabel: WalletLabel): Observable<TokenAsset[]> {
     if (assets.length === 0) {
       return of([]);
     }
@@ -170,7 +187,7 @@ export class TokenAssetMapper {
   }
 
 
-  private filterTokenAssets(tokenAssets: Asset[]): Observable<Asset[]> {
+  private filterTokenAssets(tokenAssets: TokenAsset[]): Observable<TokenAsset[]> {
     return from(tokenAssets).pipe(
       filter(asset => this.hasNonZeroBalance(asset)), 
       filter(asset => this.hasNonEmptyLogos(asset)),
@@ -178,24 +195,24 @@ export class TokenAssetMapper {
     );
   }
 
-  private hasNonZeroBalance(formattedAsset: Asset): boolean {
+  private hasNonZeroBalance(formattedAsset: TokenAsset): boolean {
     const balanceBigInt = parseUnits(formattedAsset.balance, formattedAsset.meta?.decimals as number);
     const threshold = parseUnits('0.001', formattedAsset.meta?.decimals as number);
     return balanceBigInt > threshold;
   }
     
-  private hasNonEmptyLogos(asset: Asset): boolean {
+  private hasNonEmptyLogos(asset: TokenAsset): boolean {
     return !!asset.meta?.logo;
   }
 
-  private enrichWithFormattedBalances(assets: Asset[]): Asset[] {
+  private enrichWithFormattedBalances(assets: TokenAsset[]): TokenAsset[] {
     return assets.map(asset => ({
       ...asset,
       balance: this.formatBalance(asset)
     }))
   }
 
-  private formatBalance(token: Asset): string {
+  private formatBalance(token: TokenAsset): string {
     const balanceWei = BigInt(token.balance);
     const decimals = token.meta?.decimals as number;
     const divisor = BigInt(10) ** BigInt(decimals);
@@ -204,7 +221,7 @@ export class TokenAssetMapper {
     return formattedBalance
   }
 
-  static async map(address: string, walletLabel: WalletLabel): Promise<Asset[]> {
+  static async map(address: string, walletLabel: WalletLabel): Promise<TokenAsset[]> {
     const mapper = new TokenAssetMapper();
     return new Promise((resolve, reject) => {
       mapper.getTokenAssets(address, walletLabel).subscribe({

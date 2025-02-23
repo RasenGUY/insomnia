@@ -1,5 +1,5 @@
 import React from 'react';
-import { Asset } from "@/types/assets";
+import { TokenAsset } from "@/types/assets";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@workspace/ui/components/card";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 interface TokenTabsContentProps {
-  assets: Asset[];
+  assets: TokenAsset[];
 }
 
 export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ assets }) => {
@@ -79,7 +79,7 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                           <div className="flex flex-col">
                             <div className="font-semibold flex">
                               <div className="mr-1.5 uppercase">
-                                {token.meta?.symbol || token.symbol}
+                                {token.meta?.symbol}
                               </div>
                             </div>
                             <div className="text-sm text-muted-foreground truncate">
@@ -111,7 +111,7 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                             ${(Number(token.balance) * Number(token.price)).toFixed(2)}
                           </p>
                           <p className="text-xs sm:text-sm text-muted-foreground uppercase">
-                            {token.balance} {token.meta?.symbol || token.symbol}
+                            {token.balance} {token.meta?.symbol}
                           </p>
                         </div>
                       </td>

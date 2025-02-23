@@ -7,10 +7,10 @@ import {
 
 import { TokenTabsContent } from "./TokenTabsContent";
 import { NFTTabsContent } from "./NFTTabsContent";
-import { Asset } from '@/types/assets';
+import { TokenAsset } from '@/types/assets';
 
 interface PortfolioViewProps {
-  tokenAssets: Asset[];
+  tokenAssets: TokenAsset[];
 }
 
 const PortfolioView: React.FC<Readonly<PortfolioViewProps>> = ({ tokenAssets }) => {

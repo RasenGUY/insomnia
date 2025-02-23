@@ -7,7 +7,7 @@ import {
 } from './types';
 import { config } from '@/config/configServer';
 
-export class AlchemyClient {
+export class AlchemyTokenClient {
   private readonly tokenApiUrl: string;
   private readonly priceApiUrl: string;
 
@@ -16,11 +16,6 @@ export class AlchemyClient {
     this.priceApiUrl = config.api.price.url;
   }
 
-  /**
-   * Fetches token balances for a given address
-   * @param address Wallet address
-   * @returns Promise with token balances
-   */
   async getTokenBalances(address: string): Promise<AlchemyErc20TokenBalance[]> {
     try {
       const response = await fetch(this.tokenApiUrl, {
@@ -47,11 +42,6 @@ export class AlchemyClient {
     }
   }
 
-  /**
-   * Fetches token balances for a given address
-   * @param address Wallet address
-   * @returns Promise with token balances
-   */
   async getEthBalance(address: string): Promise<bigint> {
     try {
       const response = await fetch(this.tokenApiUrl, {
@@ -80,11 +70,6 @@ export class AlchemyClient {
     }
   }
 
-  /**
-   * Fetches token metadata for a given contract address
-   * @param contractAddress Token contract address
-   * @returns Promise with token metadata
-  */
   async getTokenMetadata(contractAddress: string): Promise<AlchemyTokenMetadata> {
     try {
       const response = await fetch(this.tokenApiUrl, {
@@ -110,7 +95,6 @@ export class AlchemyClient {
       throw new Error(`Failed to fetch token metadata: ${error.message}`);
     }
   }
-
 
   async getTokenPriceByAddress(addresses: { address: string, network: string }[]): Promise<AlchemyTokenPriceData[]> {  
     try {
@@ -155,5 +139,4 @@ export class AlchemyClient {
       throw new Error(`Failed to fetch token prices: ${error.message}`);
     }
   }
-
 }

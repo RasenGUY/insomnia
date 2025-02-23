@@ -34,7 +34,7 @@ export const config: ConfigServer = {
       url: [
         'https://',
         getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK', '#'),
-        '.g.alchemy.com/v3/',
+        '.g.alchemy.com/nft/v3/',
       ].join(''),
     },
     rest: {
