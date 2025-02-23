@@ -16,23 +16,39 @@ export interface Config {
   version: string
   themes: Theme[]
   api: ApiConfig
-  ethereum: EthereumConfig
+  wallet: WalletConfig
 }
 
 export interface ConfigServer {
   port: number
   env: Environment
   auth: AuthServerConfig
-  api: ApiConfig
+  api: ApiConfigServer
   vercel: VercelConfig
   render: RenderConfig
+}
+
+export interface ApiConfigServer {
+  token: {
+    url: string
+  }
+  price: {
+    url: string
+  }
+  nft: { 
+    url: string
+  }
+  rest: {
+    url: string
+  }
 }
 
 export interface ApiConfig {
   rest: {
     url: string
-  }
+  } 
 }
+
 export interface VercelConfig {
   url: string
 }
@@ -44,8 +60,8 @@ export interface AuthServerConfig {
   sessionMaxAge: number
 }
 
-export interface EthereumConfig {
-  chain: Chain
+export interface WalletConfig {
+  defaultNetwork: Chain
   providerUrl: string
   walletConnectId: string
 }

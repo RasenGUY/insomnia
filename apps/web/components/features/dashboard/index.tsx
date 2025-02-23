@@ -15,9 +15,9 @@ interface PortfolioViewProps {
 
 const PortfolioView: React.FC<Readonly<PortfolioViewProps>> = ({ tokenAssets }) => {
   return (
-    <div className="w-full p-6"> 
+    <div className="w-full p-6 pe-0 border-0 rounded-0">  
       <Tabs defaultValue="tokens">
-        <TabsList className="grid grid-cols-2 mb-8 w-[fit-content] max-w-4xl" >
+        <TabsList className="grid grid-cols-2 mb-8 w-[fit-content] max-w-4xl bg-inherit" >
           <TabsTrigger value="tokens" className="flex items-center gap-2">
             <Coins className="h-4 w-4" />
             Tokens

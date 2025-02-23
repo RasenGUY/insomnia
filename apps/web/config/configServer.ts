@@ -15,12 +15,34 @@ export const config: ConfigServer = {
     hostname: getRequiredEnvVar('RENDER_INTERNAL_HOSTNAME', '#'),
   },
   api: {
+    token: {
+      url:[
+        'https://',
+        getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK', '#'),
+        '.g.alchemy.com/v2/',
+        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY', '#'),
+      ].join(''),
+    },
+    price: {
+      url: 
+        [
+          'https://api.g.alchemy.com/prices/v1/',
+          getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY', '#'),
+      ].join(''),
+    },
+    nft: {
+      url: [
+        'https://',
+        getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK', '#'),
+        '.g.alchemy.com/v3/',
+      ].join(''),
+    },
     rest: {
       url: getRequiredEnvVar('NEXT_PUBLIC_API', '#'),
     },
   },
 }
-
+// https://api.g.alchemy.com/prices/v1/{apiKey}/tokens/by-symbol
 export const getServerConfiguration = async (): Promise<ConfigServer> => {
   return config
 }

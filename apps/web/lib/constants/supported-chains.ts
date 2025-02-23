@@ -1,9 +1,9 @@
 import { polygon, bsc, mainnet, Chain } from "viem/chains";
 
 export enum WalletLabel {
-  POLYGON = 0,
-  ETHEREUM = 1,
-  BSC = 2,
+  POLYGON = "POLYGON",
+  ETHEREUM = "ETHEREUM",
+  BSC = "BSC",
 }
 
 export const SUPPORTED_CHAINS: Record<WalletLabel, Chain> = {
@@ -12,6 +12,16 @@ export const SUPPORTED_CHAINS: Record<WalletLabel, Chain> = {
   [WalletLabel.ETHEREUM]: mainnet
 };
 
+export const SUPPORTED_NETWORKS: Record<WalletLabel, string> = {
+  [WalletLabel.POLYGON]: "polygon-mainnet",
+  [WalletLabel.BSC]: "bsc-mainnet",
+  [WalletLabel.ETHEREUM]: "eth-mainnet"
+};
+
 export function getSupportedChainByWalletLabel(walletLabel: WalletLabel): Chain {
   return SUPPORTED_CHAINS[walletLabel];
+}
+
+export function getSupportedNetworkByWalletLabel(walletLabel: WalletLabel): string {  
+  return SUPPORTED_NETWORKS[walletLabel];
 }

@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { ApiSuccessResponseBase } from "@/types/api";
+import { ApiSuccessResponseBase } from "@/lib/fetch/types";
 
 export type Session = {
   address: Address;

@@ -17,5 +17,28 @@ export interface AlchemyTokenMetadata {
   symbol: string
 }
 
+export interface AlchemyTokenPrice {
+  currency: string,
+  value: string,
+  lastUpdatedAt: string
+}
+
+export interface AlchemyTokenPriceData {
+  network?: number,
+  address?: string,
+  symbol?: string,
+  prices: AlchemyTokenPrice[]
+}
+
+export interface AlchemyTokenPriceHistory {
+  symbol: string,
+  currency: string,
+  data: {
+    value: number,
+    timestamp: string
+  }
+}
+
 export interface GetTokenBalancesResponse extends ApiSuccessResponseBase<AlchemyErc20TokenBalance[]> {} 
 export interface GetTokenMetadataRessponse extends ApiSuccessResponseBase<AlchemyTokenMetadata> {}  
+export interface GetTokenPriceResponse extends ApiSuccessResponseBase<AlchemyTokenPriceData[]> {} 

@@ -10,9 +10,9 @@ export const configClientSchema = z.object({
       url: z.string(),
     }),
   }),
-  ethereum: z.object({
+  wallet: z.object({
     // Accepts any object shape. Use .passthrough() to allow extra keys.
-    chain: z.object({}).passthrough(),
+    defaultNetwork: z.object({}).passthrough(),
     providerUrl: z.string(),
     walletConnectId: z.string(),
   }),
@@ -22,6 +22,15 @@ export const configServerSchema = z.object({
   env: z.enum(['production', 'development', 'test']),
   api: z.object({
     rest: z.object({
+      url: z.string(),
+    }),
+    token: z.object({
+      url: z.string(),
+    }),
+    nft: z.object({
+      url: z.string(),
+    }),
+    price: z.object({
       url: z.string(),
     }),
   }),

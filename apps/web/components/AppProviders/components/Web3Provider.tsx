@@ -12,9 +12,9 @@ export const web3Config = createConfig(
       polygon
     ],
     transports: {
-      [polygon.id]: http(config.ethereum.providerUrl),
+      [polygon.id]: http(config.wallet.providerUrl),
     },
-    walletConnectProjectId: config.ethereum.walletConnectId,
+    walletConnectProjectId: config.wallet.walletConnectId,
     appName: "Insomnia Wallet",
     appDescription: "Welcome to Insomnia Wallet, the best wallet for your crypto needs!",
     appUrl: "https://localhost.com",

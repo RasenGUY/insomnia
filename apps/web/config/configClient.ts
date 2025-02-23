@@ -30,12 +30,15 @@ export const config: Config = {
       url: getRequiredEnvVar('NEXT_PUBLIC_API', '#'),
     },
   },
-  ethereum: {
-    chain: getChain(
-      getRequiredEnvVar('NEXT_PUBLIC_ETHEREUM_CHAIN', 'localhost'),
+  wallet: {
+    defaultNetwork: getChain(
+      getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_WALLET_NETWORK', 'localhost'),
     ),
-    providerUrl: getRequiredEnvVar('NEXT_PUBLIC_ETHEREUM_PROVIDER_URL', '#'),
     walletConnectId: getRequiredEnvVar('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID', '#'),
+    providerUrl: [
+      getRequiredEnvVar('NEXT_ALCHEMY_WALLET_PROVIDER_URL'),
+      getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY')
+    ].join(),
   },
 }
 
@@ -47,7 +50,6 @@ export const getClientConfiguration = async (): Promise<Config> => {
 getClientConfiguration().then((config) => {
   const validationResult = configClientSchema.safeParse(config)
   if (!validationResult.success) {
-    // safeParse returns a detailed error if the config does not match the schema
     throw new Error(`Invalid config: ${validationResult.error.message}`)
   }
 })

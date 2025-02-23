@@ -3,12 +3,13 @@ import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { TokenAssetMapper } from '@/utils/tokenAsset';
+import { WalletLabel } from '@/lib/constants/supported-chains';
 
 export const assetRouter = router({
   getTokenAssets: publicProcedure.input(
       z.object({
         address: z.string(),
-        walletlabel: z.number()
+        walletlabel: z.nativeEnum(WalletLabel),
       })
     ).query(async ({ input }) => { 
       try {

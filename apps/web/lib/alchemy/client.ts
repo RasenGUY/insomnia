@@ -1,16 +1,19 @@
-// app/services/alchemy.service.ts
 import { 
   AlchemyErc20TokenBalance, 
   AlchemyTokenMetadata,
-  AlchemyErc20TokenBalanceResult
+  AlchemyErc20TokenBalanceResult,
+  AlchemyTokenPriceData,
+  GetTokenPriceResponse
 } from './types';
-import { config } from '@/config/configClient';
+import { config } from '@/config/configServer';
 
 export class AlchemyClient {
-  private readonly apiUrl: string;
+  private readonly tokenApiUrl: string;
+  private readonly priceApiUrl: string;
 
   constructor() {
-    this.apiUrl = config.ethereum.providerUrl;
+    this.tokenApiUrl = config.api.token.url;
+    this.priceApiUrl = config.api.price.url;
   }
 
   /**
@@ -20,7 +23,7 @@ export class AlchemyClient {
    */
   async getTokenBalances(address: string): Promise<AlchemyErc20TokenBalance[]> {
     try {
-      const response = await fetch(this.apiUrl, {
+      const response = await fetch(this.tokenApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +39,6 @@ export class AlchemyClient {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
       const result = data.result as AlchemyErc20TokenBalanceResult;
       return result.tokenBalances || [];
@@ -52,7 +54,7 @@ export class AlchemyClient {
    */
   async getEthBalance(address: string): Promise<bigint> {
     try {
-      const response = await fetch(this.apiUrl, {
+      const response = await fetch(this.tokenApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +69,7 @@ export class AlchemyClient {
           ]
         }),
       });
-
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -82,10 +84,10 @@ export class AlchemyClient {
    * Fetches token metadata for a given contract address
    * @param contractAddress Token contract address
    * @returns Promise with token metadata
-   */
+  */
   async getTokenMetadata(contractAddress: string): Promise<AlchemyTokenMetadata> {
     try {
-      const response = await fetch(this.apiUrl, {
+      const response = await fetch(this.tokenApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,4 +110,50 @@ export class AlchemyClient {
       throw new Error(`Failed to fetch token metadata: ${error.message}`);
     }
   }
+
+
+  async getTokenPriceByAddress(addresses: { address: string, network: string }[]): Promise<AlchemyTokenPriceData[]> {  
+    try {
+      const response = await fetch(this.priceApiUrl.concat('/tokens/by-address'), {
+        method: 'POST',
+        headers: {
+          accept: 'application/json', 
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          addresses
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: GetTokenPriceResponse = await response.json();
+      return result.data;
+    } catch (error: any) {
+      throw new Error(`Failed to fetch token prices: ${error.message}`);
+    }
+  }
+  
+  async getTokenPriceBySymbol(symbols: string[]): Promise<AlchemyTokenPriceData[]> {  
+    try {
+      const symbolsParams = symbols.map(symbol => `symbols=${symbol}`).join('&');
+      const response = await fetch(this.priceApiUrl.concat(`/tokens/by-symbol?${symbolsParams}`), {
+        method: 'GET',
+        headers: {
+          accept: 'application/json', 
+          'content-type': 'application/json'
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result: GetTokenPriceResponse = await response.json();
+      return result.data;
+    } catch (error: any) {
+      throw new Error(`Failed to fetch token prices: ${error.message}`);
+    }
+  }
+
 }

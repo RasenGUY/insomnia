@@ -20,6 +20,7 @@ export interface Asset {
   tokenId?: string;
   balance: string;
   symbol?: string;
+  price?: string;
   imageUrl?: string;
   chainId: number;
   meta?: TokenMetadata
@@ -40,7 +41,7 @@ export const tokens: Asset[] = [
   },
   {
     type: AssetType.ERC20,
-    chainId: WalletLabel.POLYGON,
+    chainId: getSupportedChainByWalletLabel(WalletLabel.POLYGON).id,
     contractAddress: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     balance: "1,000.00",
     meta: {
@@ -54,9 +55,9 @@ export const tokens: Asset[] = [
 
 export const nfts: Asset[] = [
   {
-    chainId: WalletLabel.POLYGON,
     type: AssetType.ERC721,
     contractAddress: "0x0e7f79e89ba8c4a13431129fb2db0d4f444b5b9a",
+    chainId: getSupportedChainByWalletLabel(WalletLabel.POLYGON).id,
     symbol: "BAYC",
     balance: "1",
     imageUrl: "/api/placeholder/200/200",
@@ -64,8 +65,8 @@ export const nfts: Asset[] = [
   },
   {
     type: AssetType.ERC1155,
+    chainId: getSupportedChainByWalletLabel(WalletLabel.POLYGON).id,
     contractAddress: "0x0000000000000000000000000000000000000000",
-    chainId: WalletLabel.POLYGON,
     symbol: "DOODLE",
     balance: "3",
     imageUrl: "/api/placeholder/200/200",
