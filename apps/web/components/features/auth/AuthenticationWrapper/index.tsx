@@ -36,7 +36,8 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
   const { 
     verify, 
     isVerifying,
-    verifyError
+    verifyError,
+    isSigning
   } = useSiwe()
 
   if (isValidatingSession || isCheckingProfile || isReconnecting || isConnecting) {
@@ -53,7 +54,7 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
               await verify(address, chainId)
             }
           }}
-          isVerifying={isVerifying}
+          isVerifying={isVerifying || isSigning}
           error={verifyError?.message}
         />
       )

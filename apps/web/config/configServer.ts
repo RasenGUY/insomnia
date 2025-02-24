@@ -35,6 +35,7 @@ export const config: ConfigServer = {
         'https://',
         getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK', '#'),
         '.g.alchemy.com/nft/v3/',
+        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY', '#'),
       ].join(''),
     },
     rest: {
@@ -42,7 +43,6 @@ export const config: ConfigServer = {
     },
   },
 }
-// https://api.g.alchemy.com/prices/v1/{apiKey}/tokens/by-symbol
 export const getServerConfiguration = async (): Promise<ConfigServer> => {
   return config
 }

@@ -3,11 +3,11 @@ import { AlchemyNFTTokenMetadata, AlchemyOwnedNFT, GetNFTsForOwnerResponseData }
 import { getSupportedChainByWalletLabel } from "@/lib/constants/supported-chains";
 import { AssetType, NFTAsset, NFTAttribute } from "@/types/assets";
 import { WalletLabel } from "@/types/wallet";
-import { Asset } from "next/font/google";
 import { catchError, filter, from, mergeMap, Observable, of, toArray } from "rxjs";
 
 export class NFTAssetMapper {
   private readonly alchemyClient: AlchemyNFTClient;
+  
   constructor() {
     this.alchemyClient = new AlchemyNFTClient();
   }
@@ -30,15 +30,13 @@ export class NFTAssetMapper {
 
   filterResponseData(ownedNFTs: AlchemyOwnedNFT[]): Observable<AlchemyOwnedNFT[]> {
     return from(ownedNFTs).pipe(
-      filter(asset => this.isClassifiedAsSpam(asset)), 
+      filter(asset => this.notClassifiedAsSpam(asset)),
       toArray()
     ) 
   }
 
-  isClassifiedAsSpam(asset: AlchemyOwnedNFT): boolean {
-    if(asset.contract.isSpam) return true;
-    if(asset.contract.spamClassifications.length > 0) return true;
-    return false;
+  notClassifiedAsSpam(asset: AlchemyOwnedNFT): boolean {
+    return !(asset.contract.isSpam || asset.contract.spamClassifications.length > 0);
   }
 
   mapToNFTAssets(ownedNFTs: AlchemyOwnedNFT[], walletLabel: WalletLabel): Observable<NFTAsset[]> {
@@ -97,7 +95,7 @@ export class NFTAssetMapper {
   static async map(
     address: string, 
     walletLabel: WalletLabel,
-    pageSize: number = 10,
+    pageSize: number = 100,
     pageKey?: string,
   ): Promise<NFTAsset[]> {
     const mapper = new NFTAssetMapper();

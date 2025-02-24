@@ -24,13 +24,25 @@ export default function AppPage() {
     }
   )
   
-  if(!tokenAssets) { 
+  const { data: nftAssets } = trpc.assets.getNFTAssets.useQuery( 
+    { 
+      address: address as string, 
+      walletlabel: profile?.wallets[0]?.label as WalletLabel,
+      pageSize: 100
+    },
+    {
+      enabled: isConnected && !!address && !!profile?.wallets[0]?.label,
+      refetchOnWindowFocus: true,
+    }
+  )
+  
+  if(!tokenAssets || !nftAssets) { 
     return <LoadingScreen fullScreen/>
   }
 
   return (
     <section className="w-full flex justify-center items-center">
-      <PortfolioView tokenAssets={tokenAssets} /> 
+      <PortfolioView tokenAssets={tokenAssets} nftAssets={nftAssets} /> 
     </section>
   )
 }

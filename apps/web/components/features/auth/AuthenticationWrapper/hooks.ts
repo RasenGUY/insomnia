@@ -1,5 +1,5 @@
 'use client'
-
+import React from 'react'
 import { useSignMessage } from 'wagmi'
 import { trpc } from '@/server/client'
 import { createSiweMessage } from '@/lib/auth'
@@ -7,6 +7,7 @@ import { createSiweMessage } from '@/lib/auth'
 export function useSiwe() {
   const { signMessageAsync } = useSignMessage()
   const utils = trpc.useUtils()
+  const [isSigning, setIsSigning] = React.useState<boolean>(false)
   const siwe = trpc.auth.verify.useMutation({
     onSuccess: () => {
       utils.session.invalidate()
@@ -20,16 +21,15 @@ export function useSiwe() {
   })
 
   const handleVerify = async (address: string, chainId: number) => {
+    setIsSigning(true)
     try {
       const { data: getNonceData }  = await getNonce.refetch();
-      
       const siweMessage = createSiweMessage(address, getNonceData?.nonce as string, chainId);
-
       const message = siweMessage.prepareMessage()
       const signature = await signMessageAsync({
         message
       })
-
+      setIsSigning(false)
       await siwe.mutateAsync({
         message,
         signature
@@ -45,5 +45,6 @@ export function useSiwe() {
     verify: handleVerify,
     isVerifying: siwe.isPending,
     verifyError: siwe.error,
+    isSigning
   }
 }

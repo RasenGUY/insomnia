@@ -1,3 +1,4 @@
+import { NFTAsset } from "@/types/assets"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@workspace/ui/components/card"
 import { ScrollArea } from "@workspace/ui/components/scroll-area"
@@ -18,7 +19,12 @@ const nfts = [
     image: '/api/placeholder/200/200'
   }
 ];
-export const NFTTabsContent: React.FC = () => {
+
+interface NFTTabsContentProps {
+  assets: NFTAsset[];
+}
+
+export const NFTTabsContent: React.FC<NFTTabsContentProps> = () => {
   return ( 
     <TabsContent value="nfts">
     <Card>

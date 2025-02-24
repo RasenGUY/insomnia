@@ -141,4 +141,4 @@ export interface GetNFTsForOwnerResponseData {
 export interface GetTokenBalancesResponse extends ApiSuccessResponseBase<AlchemyErc20TokenBalance[]> {} 
 export interface GetTokenMetadataRessponse extends ApiSuccessResponseBase<AlchemyTokenMetadata> {}  
 export interface GetTokenPriceResponse extends ApiSuccessResponseBase<AlchemyTokenPriceData[]> {} 
-export interface getNFTsForOwnerResponse extends ApiSuccessResponseBase<GetNFTsForOwnerResponseData> {}  
+
