@@ -3,7 +3,7 @@ import { PublicEnvScript } from 'next-runtime-env'
 import "@workspace/ui/globals.css"
 import AppProviders from "@/components/AppProviders"
 import AppSidebar from "@/components/features/navigation/AppSidebar"
-import { AuthenticationWrapper } from "@/components/features/auth/AuthenticationWrapper"
+import AuthenticationLayout  from "@/components/features/auth"
 
 
 const fontSans = Geist({
@@ -32,9 +32,9 @@ export default function RootLayout({
       >
         <AppProviders>
           <AppSidebar>
-            <AuthenticationWrapper>
+            <AuthenticationLayout>
               {children}
-            </AuthenticationWrapper>
+            </AuthenticationLayout>
           </AppSidebar>
         </AppProviders>
       </body>

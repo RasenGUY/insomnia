@@ -15,7 +15,6 @@ interface PortfolioViewProps {
 }
 
 const PortfolioView: React.FC<Readonly<PortfolioViewProps>> = ({ tokenAssets, nftAssets }) => {
-  console.log(nftAssets)
   return (
     <div className="w-full p-6 pe-0">  
       <Tabs defaultValue="tokens">

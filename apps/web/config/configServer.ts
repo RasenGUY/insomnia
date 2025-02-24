@@ -9,37 +9,37 @@ export const config: ConfigServer = {
     sessionMaxAge: parseInt(getRequiredEnvVar('AUTH_SESSION_MAX_AGE', 3600)),
   },
   vercel: {
-    url: getRequiredEnvVar('VERCEL_URL', '#'),
+    url: getRequiredEnvVar('VERCEL_URL'),
   },
   render: {
-    hostname: getRequiredEnvVar('RENDER_INTERNAL_HOSTNAME', '#'),
+    hostname: getRequiredEnvVar('RENDER_INTERNAL_HOSTNAME'),
   },
   api: {
     token: {
       url:[
         'https://',
-        getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK', '#'),
+        getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK'),
         '.g.alchemy.com/v2/',
-        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY', '#'),
+        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY'),
       ].join(''),
     },
     price: {
       url: 
         [
           'https://api.g.alchemy.com/prices/v1/',
-          getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY', '#'),
+          getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY'),
       ].join(''),
     },
     nft: {
       url: [
         'https://',
-        getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK', '#'),
+        getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK'),
         '.g.alchemy.com/nft/v3/',
-        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY', '#'),
+        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY'),
       ].join(''),
     },
     rest: {
-      url: getRequiredEnvVar('NEXT_PUBLIC_API', '#'),
+      url: getRequiredEnvVar('NEXT_PUBLIC_API'),
     },
   },
 }

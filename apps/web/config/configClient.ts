@@ -27,16 +27,18 @@ export const config: Config = {
   themes: [Theme.DARK, Theme.LIGHT],
   api: {
     rest: {
-      url: getRequiredEnvVar('NEXT_PUBLIC_API', '#'),
+      url: getRequiredEnvVar('NEXT_PUBLIC_API'),
     },
   },
   wallet: {
     defaultNetwork: getChain(
       getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_WALLET_NETWORK', 'polygon'),
     ),
-    walletConnectId: getRequiredEnvVar('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID', '#'),
+    walletConnectId: getRequiredEnvVar('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID'),
     providerUrl: [
-      getRequiredEnvVar('NEXT_ALCHEMY_WALLET_PROVIDER_URL'),
+      'https://',
+      getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK'),
+      '.g.alchemy.com/v2/',
       getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY')
     ].join(),
   },
@@ -46,7 +48,6 @@ export const getClientConfiguration = async (): Promise<Config> => {
   return config
 }
 
-// Validate configuration using Zod
 getClientConfiguration().then((config) => {
   const validationResult = configClientSchema.safeParse(config)
   if (!validationResult.success) {

@@ -9,12 +9,25 @@ import {
   HelpCircle, 
   MoreVertical
 } from "lucide-react";
+import { Button } from '@workspace/ui/components/button';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@workspace/ui/components/dropdown-menu';
+import { useRouter } from "next/navigation";
+import { writeStateToQueryString } from '@/utils/router';
 
 interface TokenTabsContentProps {
   assets: TokenAsset[];
 }
 
 export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ assets }) => {
+  const router = useRouter();
+  const goToSendPage = (asset: TokenAsset) => {
+    const assetData = {
+      address: encodeURIComponent(asset.contractAddress),
+      type: encodeURIComponent(asset.type),
+      chainId: encodeURIComponent(asset.chainId),
+    }
+    router.push(`/send?${writeStateToQueryString(assetData)}`); 
+  }
   return (
     <TabsContent value="tokens">
       <Card className="border-0 rounded-[unset] bg-inherit">
@@ -119,11 +132,24 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                       {/* Actions */}
                       <td className="w-6">
                         <div className="flex items-center justify-center h-full">
-                          <div className="md:hidden group-hover:block">
-                            <button className="w-6 h-6 flex items-center justify-center text-muted-foreground hover:bg-accent rounded-lg transition-colors">
-                              <MoreVertical className="w-4 h-4" />
-                            </button>
-                          </div>
+                            <DropdownMenu>
+                            <DropdownMenuTrigger>
+                              <Button 
+                                variant="ghost" 
+                                className="hidden group-hover:flex h-auto p-0 hover:bg-transparent"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => goToSendPage(token)}
+                                >
+                                Send
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>View on Explorer</DropdownMenuItem>
+                            </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                       </td>
                     </tr>

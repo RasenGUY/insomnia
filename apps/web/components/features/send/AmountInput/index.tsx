@@ -1,72 +1,94 @@
+// components/features/send/AmountInput/index.tsx
 import { Input } from "@workspace/ui/components/input";
-import { Asset } from "@/types/assets";
+import { Button } from "@workspace/ui/components/button";
+import { TokenAsset, NFTAsset, AssetType } from "@/types/assets";
+import { formatBalance, parseInputAmount } from "@/utils/format";
 
 interface AmountInputProps {
   value: string;
   onChange: (value: string) => void;
-  asset: Asset;
+  asset: TokenAsset | NFTAsset | null;
   error?: string;
   disabled?: boolean;
 }
 
-export function AmountInput({ value, onChange, asset, error, disabled }: AmountInputProps) {
+export function AmountInput({
+  value,
+  onChange,
+  asset,
+  error,
+  disabled
+}: Readonly<AmountInputProps>) {
+  if (!asset) return null;
+
+  const isNFT = asset.type === AssetType.ERC721 || asset.type === AssetType.ERC1155;
+  const maxAmount = asset.balance;
+  const symbol = isNFT ? '' : (asset as TokenAsset).meta?.symbol;
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow only numbers and a single decimal point
     const newValue = e.target.value;
+    // Allow only numbers and a single decimal point
     if (/^[0-9]*\.?[0-9]*$/.test(newValue) || newValue === "") {
       onChange(newValue);
     }
   };
 
-  // Handle max button click
   const handleMaxClick = () => {
-    if (asset) {
-      onChange(asset.balance);
-    }
+    if (!asset) return;
+    onChange(maxAmount);
+  };
+
+  // Calculate USD value for tokens if price is available
+  const getUSDValue = () => {
+    if (isNFT || !(asset as TokenAsset).price || !value) return null;
+    const tokenAsset = asset as TokenAsset;
+    const amount = Number(parseInputAmount(value));
+    return (amount * Number(tokenAsset.price)).toFixed(2);
   };
 
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <p className="font-semibold">Amount</p>
-        {asset && (
-          <button 
+        {!isNFT && (
+          <Button
             type="button"
-            className="text-xs text-primary hover:underline"
+            variant="ghost"
+            className="h-auto p-0 text-xs text-primary hover:text-primary/80"
             onClick={handleMaxClick}
           >
-            Max: {asset.balance} {asset.symbol}
-          </button>
+            Max: {formatBalance(maxAmount)} {symbol}
+          </Button>
         )}
       </div>
-      
+
       <div className="relative">
-        <div className="relative h-12 flex items-center border border-input rounded-md focus-within:border-primary hover:border-primary">
+        <div className="relative flex items-center border border-input rounded-md focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
           <Input
             type="text"
             value={value}
             onChange={handleAmountChange}
             placeholder="0.00"
-            className="border-none h-full focus-visible:ring-0 focus-visible:ring-offset-0"
-            disabled={disabled}
+            className="border-0 focus-visible:ring-0 pr-16"
+            disabled={disabled || asset.type === AssetType.ERC721}
           />
-          {asset && (
-            <span className="mr-4 text-muted-foreground">
-              {asset.symbol}
-            </span>
+          {symbol && (
+            <div className="absolute right-3 text-muted-foreground">
+              {symbol}
+            </div>
           )}
         </div>
-        
         {error && (
-          <div className="absolute -bottom-5 text-destructive text-xs">
+          <p className="absolute text-sm text-destructive mt-1">
             {error}
-          </div>
+          </p>
         )}
       </div>
-      
-      {asset && asset.balanceUsd && (
-        <div className="text-xs text-muted-foreground">
-          ${asset.balanceUsd}
+
+      {/* USD Value */}
+      {!isNFT && (
+        <div className="text-sm text-muted-foreground">
+          {getUSDValue() ? `≈ $${getUSDValue()}` : ''}
         </div>
       )}
     </div>

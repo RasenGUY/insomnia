@@ -76,7 +76,7 @@ export interface AlchemyNFTOpenSeaMetadata {
 
 export interface AlchemyNFTContractInfo {
   address: string;
-  name: string | null;
+  name: string;
   symbol: string | null;
   totalSupply: string | null;
   tokenType: 'ERC721' | 'ERC1155';

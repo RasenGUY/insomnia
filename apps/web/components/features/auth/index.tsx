@@ -2,14 +2,14 @@
 
 import React from 'react'
 import { useAccount, useChainId } from 'wagmi'
-import { SiweModal } from './components/SiweModal'
-import { ConnectWalletSection } from '../../connect/ConnectWalletSection'
-import { useSiwe } from './hooks'
-import {LoadingScreen} from '../../common/LoadingScreen'
+import { SiweModal } from '@/components/features/auth/SiweModal'
+import { ConnectWalletScreen } from '@/components/features/auth/ConnectWalletScreen'
+import {LoadingScreen} from '@/components/features/common/LoadingScreen'
+import { useSiwe } from '@/components/features/auth/hooks'
 import { trpc } from '@/server/client'
 import { useRouter } from 'next/navigation'
 
-export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
+const AuthenticationLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { isConnected, address, isReconnecting, isConnecting } = useAccount()
   const router = useRouter()
   const chainId = useChainId()
@@ -62,7 +62,9 @@ export const AuthenticationWrapper: React.FC<React.PropsWithChildren> = ({ child
       if(!profile) router.push('/auth/register')
     }
   } else {
-    if(!isConnecting) return <ConnectWalletSection />
+    if(!isConnecting) return <ConnectWalletScreen />
   }
   return <>{children}</>
 }
+
+export default AuthenticationLayout

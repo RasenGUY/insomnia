@@ -1,56 +1,25 @@
-// components/features/send/SendTransactionForm.tsx
+'use client'
 import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import { AssetSelector } from "./AssetSelector";
-import { Asset, AssetType } from "@/types/assets";
 import { RecipientInput } from "./RecipientInput";
 import { AmountInput } from "./AmountInput";
 import { NFTDetails } from "./NFTDetails";
-import { Input } from "@workspace/ui/components/input";
+import { AssetType } from "@/types/assets";
+import { useAssetLoader } from "./hooks";
+import { 
+  TokenSendFormValues, 
+  NFTSendFormValues, 
+  tokenSendFormSchema, 
+  nftSendFormSchema 
+} from "@/lib/validations/sendForm";
 import { Address } from "viem";
 
-// Form validation schema using zod
-const sendFormSchema = z.object({
-  fromAddress: z.string().min(1, "Sender address is required"),
-  toAddress: z
-    .string()
-    .min(1, "Recipient address is required")
-    .refine(
-      (val) => /^0x[a-fA-F0-9]{40}$/.test(val) || val.endsWith('.eth'),
-      { message: "Invalid address format" }
-    ),
-  asset: z.object({
-    id: z.string(),
-    type: z.enum(["NATIVE", "ERC20", "ERC721", "ERC1155"]),
-    symbol: z.string(),
-    name: z.string(),
-    balance: z.string(),
-    imageUrl: z.string(),
-    networkImageUrl: z.string().optional(),
-    contractAddress: z.string().optional(),
-    tokenId: z.string().optional(),
-    balanceUsd: z.string().optional(),
-  }).optional().nullable(),
-  amount: z.string().optional()
-}).refine(data => {
-  // Skip amount validation for ERC721
-  if (data.asset?.type === "ERC721") return true;
-  
-  // For other asset types, amount is required and must be a valid number
-  if (!data.amount) return false;
-  const numAmount = parseFloat(data.amount);
-  return !isNaN(numAmount) && numAmount > 0;
-}, {
-  message: "Amount is required and must be greater than 0",
-  path: ["amount"]
-});
-
-type SendFormValues = z.infer<typeof sendFormSchema>;
-interface SendTransactionFormProps {  
+interface SendTransactionFormProps {
   fromAddress: Address | undefined;
 }
 
@@ -58,114 +27,119 @@ export default function SendTransactionForm({
   fromAddress
 }: Readonly<SendTransactionFormProps>) {
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
+  const { selectedAsset, setSelectedAsset, tokenAssets, nftAssets } = useAssetLoader(fromAddress);
+
+  // Determine which schema to use based on selected asset type
+  const isNFT = selectedAsset?.type === AssetType.ERC721 || selectedAsset?.type === AssetType.ERC1155;
+  const resolver = isNFT ? zodResolver(nftSendFormSchema) : zodResolver(tokenSendFormSchema); 
   
-  const { register, control, handleSubmit, watch, setValue, formState: { errors, isValid }, getValues } = useForm<SendFormValues>({  
-    resolver: zodResolver(sendFormSchema),
+  const { 
+    register, 
+    control, 
+    handleSubmit, 
+    watch, 
+    setValue, 
+    formState: { errors, isValid }, 
+    getValues,
+    reset 
+  } = useForm({
+    resolver: resolver as Resolver<any>,
     mode: "onChange",
     defaultValues: {
       fromAddress: fromAddress,
       toAddress: "",
       asset: null,
-      amount: ""
+      amount: isNFT ? "1" : ""
     }
   });
-  
-  const selectedAsset = watch("asset");
-  
+
+  // Watch form values
+  const selectedFormAsset = watch("asset");
+
   // Handle asset selection
-  const handleAssetSelect = (asset: Asset) => {
+  const handleAssetSelect = (asset: typeof selectedAsset) => {
+    if (!asset) return;
+
+    setSelectedAsset(asset);
     setValue("asset", asset, { shouldValidate: true });
     setIsAssetModalOpen(false);
-    
-    // If ERC721, set amount to 1
+
+    // Set default amount for NFTs
     if (asset.type === AssetType.ERC721) {
       setValue("amount", "1", { shouldValidate: true });
     }
   };
-  
+
   // Handle form submission
-  const onSubmit = (data: SendFormValues) => {
-    console.log("Transaction data:", data);
-    
-    // Here you would connect to wallet provider and send the transaction
-    // const txHash = await sendTransaction(data);
+  const onSubmit = async (data: TokenSendFormValues | NFTSendFormValues) => {
+    try {
+      // Here you would:
+      // 1. Prepare the transaction
+      // 2. Get user confirmation
+      // 3. Send the transaction
+      // 4. Handle the response
+      console.log("Transaction data:", data);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
   };
-  
+
   return (
-    <Card className="rounded-2xl w-full max-w-md p-6 bg-card">
+    <Card className="w-full max-w-md p-6">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="p-0 space-y-6">
-          {/* From Address Selector */}
+          {/* From Address */}
           <div className="space-y-2">
-            <p className="font-semibold">From Address</p>
-            <div className="relative">
-              <Input
-                disabled={true}
-                {...register('fromAddress')}
-                value={getValues('fromAddress')}
-                defaultValue={fromAddress}
-                className={"h-12 bg-transparent"}
-              />
-            </div>
+            <p className="font-semibold">From</p>
+            <Input
+              disabled
+              {...register('fromAddress')}
+              defaultValue={fromAddress}
+              className="h-12 bg-accent"
+            />
           </div>
-          
-          {/* To Address Input */}
-          <Controller
-            name="toAddress"
-            control={control}
-            render={({ field }) => (
-              <RecipientInput
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.toAddress?.message}
-              />
-            )}
+
+          {/* To Address */}
+          <RecipientInput
+            value={getValues('toAddress')}
+            onChange={(value) => setValue('toAddress', value, { shouldValidate: true })}
+            error={errors.toAddress?.message}
           />
-          
+
           {/* Asset Selector */}
-          <Controller
-            name="asset"
-            control={control}
-            render={({ field }) => (
-              <AssetSelector
-                value={field.value as Asset}
-                onChange={handleAssetSelect}
-                isModalOpen={isAssetModalOpen}
-                setIsModalOpen={setIsAssetModalOpen}
-                error={errors.asset?.message}
-              />
-            )}
+          <AssetSelector
+            value={selectedFormAsset}
+            onChange={handleAssetSelect}
+            isModalOpen={isAssetModalOpen}
+            setIsModalOpen={setIsAssetModalOpen}
+            tokenAssets={tokenAssets || []}
+            nftAssets={nftAssets || []}
+            error={errors.asset?.message}
           />
-          
+
           {/* Amount Input - hide for ERC721 NFTs */}
-          {(!selectedAsset || selectedAsset.type !== AssetType.ERC721) && (
-            <Controller
-              name="amount"
-              control={control}
-              render={({ field }) => (
-                <AmountInput
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  asset={selectedAsset as Asset}
-                  error={errors.amount?.message}
-                  disabled={selectedAsset?.type === AssetType.ERC721}
-                />
-              )}
+          {(!selectedFormAsset || selectedFormAsset.type !== AssetType.ERC721) && (
+            <AmountInput
+              value={getValues('amount') || ''}
+              onChange={(value) => setValue('amount', value, { shouldValidate: true })}
+              asset={selectedFormAsset}
+              error={errors.amount?.message}
+              disabled={selectedFormAsset?.type === AssetType.ERC721}
             />
           )}
-          
-          {/* NFT Details - show for NFTs */}
-          {selectedAsset && (selectedAsset.type === AssetType.ERC721 || selectedAsset.type === AssetType.ERC1155) && (
-            <NFTDetails asset={selectedAsset as Asset} />
+
+          {/* NFT Details */}
+          {selectedFormAsset && (selectedFormAsset.type === AssetType.ERC721 || selectedFormAsset.type === AssetType.ERC1155) && (
+            <NFTDetails asset={selectedFormAsset} />
           )}
-          
+
           {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full mt-4" 
+          <Button
+            type="submit"
+            className="w-full"
             disabled={!isValid}
           >
-            Send
+            Review Send
           </Button>
         </CardContent>
       </form>
