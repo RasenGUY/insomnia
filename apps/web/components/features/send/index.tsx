@@ -1,6 +1,6 @@
 'use client'
-import { useState } from "react";
-import { Resolver, useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Resolver, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
@@ -39,13 +39,14 @@ export default function SendTransactionForm({
     handleSubmit, 
     watch, 
     setValue, 
-    formState: { errors, isValid }, 
+    formState: { errors, isValid, dirtyFields }, 
     getValues,
     reset 
   } = useForm({
     resolver: resolver as Resolver<any>,
     mode: "onChange",
     defaultValues: {
+      userName: '',
       fromAddress: fromAddress,
       toAddress: "",
       asset: null,
@@ -55,7 +56,7 @@ export default function SendTransactionForm({
 
   // Watch form values
   const selectedFormAsset = watch("asset");
-
+  
   // Handle asset selection
   const handleAssetSelect = (asset: typeof selectedAsset) => {
     if (!asset) return;
@@ -84,8 +85,11 @@ export default function SendTransactionForm({
     }
   };
 
+  useEffect(()=>{
+    console.log(errors)
+  })
   return (
-    <Card className="w-full max-w-md p-6">
+    <Card className="w-full max-w-lg p-6">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="p-0 space-y-6">
           {/* From Address */}
@@ -99,11 +103,19 @@ export default function SendTransactionForm({
             />
           </div>
 
-          {/* To Address */}
-          <RecipientInput
-            value={getValues('toAddress')}
-            onChange={(value) => setValue('toAddress', value, { shouldValidate: true })}
-            error={errors.toAddress?.message}
+          {/* To Address - Using Controller with RecipientInput */}
+          <Controller
+            control={control}
+            name="toAddress"
+            render={({ field }) => (
+              <RecipientInput
+                value={field.value}
+                onChange={field.onChange}
+                isDirty={dirtyFields['toAddress']}
+                setValue={(value: string) => field.onChange(value)}
+                error={errors.toAddress?.message as string}
+              />
+            )}
           />
 
           {/* Asset Selector */}
@@ -114,17 +126,23 @@ export default function SendTransactionForm({
             setIsModalOpen={setIsAssetModalOpen}
             tokenAssets={tokenAssets || []}
             nftAssets={nftAssets || []}
-            error={errors.asset?.message}
+            error={errors.asset?.message as string}
           />
 
           {/* Amount Input - hide for ERC721 NFTs */}
           {(!selectedFormAsset || selectedFormAsset.type !== AssetType.ERC721) && (
-            <AmountInput
-              value={getValues('amount') || ''}
-              onChange={(value) => setValue('amount', value, { shouldValidate: true })}
-              asset={selectedFormAsset}
-              error={errors.amount?.message}
-              disabled={selectedFormAsset?.type === AssetType.ERC721}
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field }) => (
+                <AmountInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  asset={selectedFormAsset}
+                  disabled={selectedFormAsset?.type === AssetType.ERC721}
+                  error={errors.amount?.message as string}
+                />
+              )}
             />
           )}
 

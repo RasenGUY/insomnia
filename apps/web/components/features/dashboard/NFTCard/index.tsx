@@ -1,7 +1,6 @@
 import { NFTAsset } from "@/types/assets";
 import { MoreHorizontal } from "lucide-react";
 import { AvatarImage, AvatarFallback, Avatar } from "@workspace/ui/components/avatar";
-import { Button } from "@workspace/ui/components/button";
 import { 
   DropdownMenu, 
   DropdownMenuTrigger, 
@@ -10,6 +9,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@workspace/ui/components/hover-card";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@workspace/ui/components/tooltip";
+import { Card } from "@workspace/ui/components/card";
 
 interface NFTCardProps {
   nft: NFTAsset;
@@ -20,8 +20,7 @@ interface NFTCardProps {
 export const NFTCard: React.FC<NFTCardProps> = ({ nft, index, handleSend }) => {
   
   return (
-    <button
-      type="button"
+    <Card
       tabIndex={0}
       className="relative translate-y-0 hover:z-10 hover:shadow-2xl hover:-translate-y-0.5 bg-inherit rounded-lg shadow-xl transition-all cursor-pointer group border border-muted w-full text-left"
     >
@@ -101,12 +100,11 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, index, handleSend }) => {
 
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button 
-                variant="ghost" 
+              <span  
                 className="hidden group-hover:flex h-auto p-0 hover:bg-transparent"
               >
                 <MoreHorizontal className="h-4 w-4" />
-              </Button>
+              </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center">
               <DropdownMenuItem
@@ -132,6 +130,6 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, index, handleSend }) => {
           </Tooltip>
         </TooltipProvider>
       </div>
-    </button>
+    </Card>
   );
 };

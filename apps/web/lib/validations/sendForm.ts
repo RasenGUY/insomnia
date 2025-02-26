@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AssetType } from "@/types/assets";
+import { isAddress } from "viem";
 
 // Base schema for common fields
 const baseFormSchema = z.object({
@@ -8,7 +9,13 @@ const baseFormSchema = z.object({
     .string()
     .min(1, "Recipient address is required")
     .refine(
-      (val) => /^0x[a-fA-F0-9]{40}$/.test(val) || val.endsWith('.eth'),
+      (val) => {
+        console.log({
+          message: 'Address validation',
+          val
+        })
+        return isAddress(val)
+      },
       { message: "Invalid address format" }
     ),
 });

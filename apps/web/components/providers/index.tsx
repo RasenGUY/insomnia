@@ -1,10 +1,11 @@
 "use client"
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
-import { Web3Provider } from "@/components/AppProviders/Web3Provider";
 import { SidebarProvider } from "@workspace/ui/components/sidebar";
+
 import { getQueryClient } from "@/utils/query-client";
-import { TRPCProvider } from "@/components/AppProviders/TRPCProvider";
+import { Web3Provider } from "./Web3Provider";
+import { TRPCProvider } from "./TRPCProvider";
 
 export const queryClient = getQueryClient();
 

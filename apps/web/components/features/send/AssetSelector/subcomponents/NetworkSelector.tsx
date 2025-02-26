@@ -5,7 +5,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { Button } from "@workspace/ui/components/button"; 
 import { ChevronDown } from "lucide-react";
 
 interface NetworkSelectorProps {
@@ -22,10 +21,10 @@ export const NetworkSelector: React.FC<NetworkSelectorProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="w-[140px] justify-between">
+        <span className="w-[140px] justify-between">
           {selectedNetwork ? `Chain ${selectedNetwork}` : "All Networks"}
           <ChevronDown className="h-4 w-4 ml-2" />
-        </Button>
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[140px]">
         <DropdownMenuItem onClick={() => onSelect(null)}>

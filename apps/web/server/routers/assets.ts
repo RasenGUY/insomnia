@@ -40,10 +40,6 @@ export const assetRouter = router({
           input.pageSize, 
           input.pageKey
         );
-        console.dir({
-          assetsLength: assets.length,
-          filteredAssets: assets
-        }, { depth: null })
         return assets;
       } catch (error) {
         throw new TRPCError({

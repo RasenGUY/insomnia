@@ -18,6 +18,7 @@
     "@trpc/server": "11.0.0-rc.768",
     "@types/lodash": "^4.17.15",
     "@workspace/ui": "workspace:*",
+    "blockies-react-svg": "^0.0.13",
     "connectkit": "^1.8.2",
     "immer": "^10.1.1",
     "joi": "^17.13.3",

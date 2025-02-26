@@ -174,6 +174,9 @@ importers:
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      blockies-react-svg:
+        specifier: ^0.0.13
+        version: 0.0.13(react@19.0.0)
       connectkit:
         specifier: ^1.8.2
         version: 1.8.2(@babel/core@7.26.8)(@tanstack/react-query@5.66.0(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react-is@18.3.1)(react@19.0.0)(viem@2.23.0(bufferutil@4.0.9)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.1))(wagmi@2.14.11(@tanstack/query-core@5.66.0)(@tanstack/react-query@5.66.0(react@19.0.0))(@types/react@18.3.0)(bufferutil@4.0.9)(immer@10.1.1)(react@19.0.0)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.23.0(bufferutil@4.0.9)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.1))(zod@3.24.1))
@@ -2973,6 +2976,11 @@ packages:
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
+
+  blockies-react-svg@0.0.13:
+    resolution: {integrity: sha512-w3Upvq5xnO2m0KEf4QhExLDpPMlJZes0Oi5e1EaILTpU+TtDGipoqxJuGGMhFHl2Qg7cuw4P1pAgEMy+Y3nZrg==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   bn.js@4.12.1:
     resolution: {integrity: sha512-k8TVBiPkPJT9uHLdOKfFpqcfprwBFOAAXXozRubr7R7PfIuKvQlzcI4M0pALeqXN09vdaMbUdUj+pass+uULAg==}
@@ -10207,6 +10215,10 @@ snapshots:
       buffer: 5.7.1
       inherits: 2.0.4
       readable-stream: 3.6.2
+
+  blockies-react-svg@0.0.13(react@19.0.0):
+    dependencies:
+      react: 19.0.0
 
   bn.js@4.12.1: {}
 

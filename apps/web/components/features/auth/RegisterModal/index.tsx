@@ -5,7 +5,7 @@ import { Input } from '@workspace/ui/components/input';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { AlertCircle } from 'lucide-react';
 import { usernameSchema } from '@/lib/validations/auth';
-import { GradientAvatar } from '@/components/features/common/GradientAvatar';
+import BlockiesAvatar from 'blockies-react-svg';
 import { z } from 'zod';
 
 interface RegisterModalProps {
@@ -41,7 +41,7 @@ export const RegisterModal = ({
     if (username) {
       validateUsername(username);
     }
-  }, [username]);
+  }, [username, error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,18 +56,25 @@ export const RegisterModal = ({
         <DialogHeader>
           <DialogTitle>Complete Registration</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col items-center space-y-4 mb-4">
-          <div className="rounded-full overflow-hidden border-4 border-background shadow-lg">
-            <GradientAvatar 
-              seed={username} 
-              size={80} 
-              className="border-4 border-background shadow-lg"
-            />
+        {
+          username.length > 0 && (
+          <div className="flex flex-col items-center space-y-4 mb-4">
+            <div className={
+              `rounded-full overflow-hidden border-[.25rem] border-primary shadow-lg`
+            }
+            
+            >
+              <BlockiesAvatar 
+                address={username}
+                scale={25}  
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Your unique profile avatar
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Your unique profile avatar
-          </p>
-        </div>
+          )
+        }
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="username" className="text-sm font-medium">
@@ -89,9 +96,9 @@ export const RegisterModal = ({
           </div>
 
           {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="flex items-baseline">
+              <AlertCircle style={{ position: 'unset'}} className="h-4 w-4" />
+              <AlertDescription style={{paddingLeft: '0.5rem'}}>{error}</AlertDescription>
             </Alert>
           )}
 

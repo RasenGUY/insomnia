@@ -1,7 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import { PublicEnvScript } from 'next-runtime-env'
 import "@workspace/ui/globals.css"
-import AppProviders from "@/components/AppProviders"
+import AppProviders from "@/components/providers"
 import AppSidebar from "@/components/features/navigation/AppSidebar"
 import AuthenticationLayout  from "@/components/features/auth"
 

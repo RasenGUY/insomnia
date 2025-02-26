@@ -1,10 +1,11 @@
+'use client'
 import { Send, LayoutDashboard } from "lucide-react"
 import Image from "next/image"
 import Logo from "public/images/logo.svg"
-
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -13,9 +14,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@workspace/ui/components/sidebar"
 import Navbar from "../Navbar"
 import Link from "next/link"
+import BlockiesAvatar from "blockies-react-svg"
+import { useAccount } from "wagmi"
+import { trpc } from "@/server/client"
 
 const items = [
   {
@@ -31,6 +36,14 @@ const items = [
 ]
 
 export default function AppSidebar({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { address } = useAccount()
+  const sidebarState = useSidebar()
+  const { data: profile } = trpc.resolver.reverse.useQuery(
+    { address: address as string },
+    {
+      enabled: !!address,
+    }
+  )
   return (
     <>
       <Sidebar collapsible={"icon"}>
@@ -57,6 +70,26 @@ export default function AppSidebar({ children }: Readonly<{ children: React.Reac
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+        {
+          profile && sidebarState.state === 'expanded' && (
+            <SidebarFooter>
+            <SidebarGroup className="flex items-center gap-2">
+                 {
+                  sidebarState.state === 'expanded' &&
+                  <BlockiesAvatar 
+                    address={profile.username}
+                    scale={25}
+                    size={3}  
+                    className="rounded-full overflow-hidden border-[.25rem] border-primary shadow-lg"  
+                  />
+                 }
+              <SidebarContent className="flex items-center gap-2 text-sm">
+                {profile.username}
+              </SidebarContent>
+            </SidebarGroup>
+          </SidebarFooter>  
+          )
+        }
         <SidebarRail />
       </Sidebar>
       <div className="w-full relative"> 

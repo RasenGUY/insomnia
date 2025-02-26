@@ -9,7 +9,6 @@ import {
   HelpCircle, 
   MoreVertical
 } from "lucide-react";
-import { Button } from '@workspace/ui/components/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@workspace/ui/components/dropdown-menu';
 import { useRouter } from "next/navigation";
 import { writeStateToQueryString } from '@/utils/router';
@@ -37,7 +36,7 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[400px] pr-4">
-            {assets.length > 0 ? (
+            {assets.length > 0 && !noZeroBalances(assets) ? (
               <table className="w-full">
                 <thead className="border-b border-muted">
                   <tr>
@@ -134,12 +133,11 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                         <div className="flex items-center justify-center h-full">
                             <DropdownMenu>
                             <DropdownMenuTrigger>
-                              <Button 
-                                variant="ghost" 
+                              <span 
                                 className="hidden group-hover:flex h-auto p-0 hover:bg-transparent"
                               >
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
+                              </span>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
@@ -157,9 +155,11 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                 </tbody>
               </table>
             ) : (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
+              <Alert className="flex items-baseline"> 
+                <AlertCircle style={{
+                  position: 'unset',
+                }} className="h-5 w-5" /> 
+                <AlertDescription style={{paddingLeft: '0.5rem'}}>
                   No tokens found in this wallet.
                 </AlertDescription>
               </Alert>
@@ -170,3 +170,7 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
     </TabsContent>
   );
 };
+
+function noZeroBalances(assets: TokenAsset[]) {
+  return !assets.every(asset => Number(asset.balance) !== 0)
+}
