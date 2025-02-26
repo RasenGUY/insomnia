@@ -13,7 +13,8 @@ export class AlchemyNFTClient {
     pageSize: number = 100, 
     pageKey?: string,
   ): Promise<GetNFTsForOwnerResponseData> { 
-    let urlConcat = `/getNFTsForOwner?owner=${owner}&orderBy=transferTime&withMetadata=true&pageSize=${pageSize}${pageKey ? `&pageKey=${pageKey}` : ''}` 
+    const pageKeyParam = pageKey ? '&pageKey=' + pageKey : '';
+    let urlConcat = `/getNFTsForOwner?owner=${owner}&orderBy=transferTime&withMetadata=true&pageSize=${pageSize}${pageKeyParam}` 
     const response = await fetch(
       this.nftApiUrl.concat(urlConcat), 
       { 
@@ -25,6 +26,6 @@ export class AlchemyNFTClient {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const result: GetNFTsForOwnerResponseData = await response.json();
-    return result as GetNFTsForOwnerResponseData;
+    return result;
   }
 }

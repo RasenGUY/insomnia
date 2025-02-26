@@ -44,7 +44,7 @@ export function TokenList({ assets, onSelect }: Readonly<TokenListProps>) {
             </div>
           </div>
           <div className="text-right">
-            <p className="font-medium">{formatBalance(asset.balance)} {asset.meta?.symbol}</p>
+            <p className="font-medium">{formatBalance(asset.balance, asset.meta?.decimals)} {asset.meta?.symbol}</p>
             {asset.price && (
               <p className="text-sm text-muted-foreground">
                 ${(Number(asset.balance) * Number(asset.price)).toFixed(2)}

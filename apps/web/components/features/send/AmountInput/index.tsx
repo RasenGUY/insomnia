@@ -3,6 +3,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { TokenAsset, NFTAsset, AssetType } from "@/types/assets";
 import { formatBalance, parseInputAmount } from "@/utils/format";
+import { formatUnits } from "viem";
 
 interface AmountInputProps {
   value: string;
@@ -42,8 +43,7 @@ export function AmountInput({
   const getUSDValue = () => {
     if (isNFT || !(asset as TokenAsset).price || !value) return null;
     const tokenAsset = asset as TokenAsset;
-    const amount = Number(parseInputAmount(value));
-    return (amount * Number(tokenAsset.price)).toFixed(2);
+    return (Number(value) * Number(tokenAsset.price)).toFixed(2);
   };
 
   return (
@@ -79,7 +79,7 @@ export function AmountInput({
           )}
         </div>
         {error && (
-          <p className="absolute text-sm text-destructive mt-1">
+          <p className="text-sm text-destructive mt-1">
             {error}
           </p>
         )}

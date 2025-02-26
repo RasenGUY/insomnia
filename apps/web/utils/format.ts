@@ -12,7 +12,7 @@ export const formatCurrency = (value: number | string): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 4,
     maximumFractionDigits: 2
   }).format(numValue);
 };
@@ -26,7 +26,7 @@ export const formatNumber = (value: number | string, decimals: number = 2): stri
   if (isNaN(numValue)) return '0';
 
   return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 5,
     maximumFractionDigits: decimals
   }).format(numValue);
 };
@@ -37,8 +37,7 @@ export const formatNumber = (value: number | string, decimals: number = 2): stri
  */
 export const formatBalance = (balance: string, decimals: number = 18): string => {
   try {
-    const formatted = formatUnits(BigInt(balance), decimals);
-    return formatNumber(formatted);
+    return formatNumber(balance, 8);
   } catch (error) {
     console.error('Error formatting balance:', error);
     return '0';
@@ -71,3 +70,7 @@ export const shortenString = (str: string, startLength: number = 6, endLength: n
   if (str.length <= startLength + endLength) return str;
   return `${str.slice(0, startLength)}...${str.slice(-endLength)}`;
 };
+
+export function capitalizeStr(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

@@ -14,6 +14,7 @@ interface RecipientInputProps {
   setValue: (value: string) => void;
   onChange: (value: string) => void;
   error?: string;
+  triggerValidation?: () => void;
 }
 
 export function RecipientInput({
@@ -21,11 +22,13 @@ export function RecipientInput({
   onChange,
   isDirty,
   error,
-  setValue
+  setValue,
+  triggerValidation
 }: Readonly<RecipientInputProps>) {
   const [resolvedProfile, setResolvedProfile] = useState<Profile | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [walletSelected, setWalletSelected] = useState(false);
+  const [isValidAddress, setIsValidAddress] = useState(false);
   const [debouncedValue] = useDebounce(value, 1000);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,6 +39,11 @@ export function RecipientInput({
       enabled: false,
     }
   );
+
+  // Check if current value is a valid address
+  useEffect(() => {
+    setIsValidAddress(isAddress(value));
+  }, [value]);
 
   // Handle profile resolution
   useEffect(() => {
@@ -52,8 +60,10 @@ export function RecipientInput({
     if (debouncedValue?.length === 0) {
       setResolvedProfile(null);
       setShowDropdown(false);
+      setWalletSelected(false);
     } else if (!debouncedValue?.startsWith('0x')) {
       refetch();
+      setWalletSelected(false);
     }
   }, [debouncedValue, refetch]);
 
@@ -80,7 +90,15 @@ export function RecipientInput({
   const handleWalletSelect = (address: string) => {
     setValue(address);
     setWalletSelected(true);
+    setIsValidAddress(isAddress(address));
     setShowDropdown(false);
+    
+    // Trigger validation if available
+    if (triggerValidation) {
+      setTimeout(() => {
+        triggerValidation();
+      }, 0);
+    }
   };
 
   // Determine input border style
@@ -99,7 +117,12 @@ export function RecipientInput({
           <Input
             ref={inputRef}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => {
+              if (walletSelected) {
+                setWalletSelected(false);
+              }
+              onChange(e.target.value);
+            }}
             placeholder="Enter address (0x), or username"
             className={`h-12 pl-10 ${getBorderStyle()}`}
             onFocus={() => resolvedProfile && setShowDropdown(true)}
@@ -109,9 +132,16 @@ export function RecipientInput({
           </div>
           
           {/* Show loading state */}
-          {(isLoading || isFetching) && isDirty && (
+          {(isLoading || isFetching) && isDirty && !walletSelected && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          )}
+          
+          {/* Show success check when address is valid and no error */}
+          {isValidAddress && !error && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
             </div>
           )}
         </div>
@@ -133,12 +163,6 @@ export function RecipientInput({
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    
-                    // Debug logs
-                    console.log('Button clicked');
-                    console.log('Wallet address:', wallet.address);
-                    
-                    // Call handler directly after the logs
                     handleWalletSelect(wallet.address);
                   }}
                 >

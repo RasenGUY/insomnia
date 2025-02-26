@@ -5,6 +5,11 @@ import { TRPCError } from '@trpc/server';
 import { TokenAssetMapper } from '@/utils/tokenAsset';
 import { WalletLabel } from '@/lib/constants/supported-chains';
 import { NFTAssetMapper } from '@/utils/nftAsset';
+import { AssetType } from '@/types/assets';
+import { WagmiNFTClient } from '@/lib/wagmi/nftClient';
+import { web3Config } from '@/components/providers/Web3Provider';  
+import { WagmiTokenClient } from '@/lib/wagmi/tokenClient'; 
+import { Address } from 'viem';
 
 export const assetRouter = router({
   getTokenAssets: publicProcedure.input(
@@ -26,27 +31,88 @@ export const assetRouter = router({
     }),
 
   getNFTAssets: publicProcedure.input(
-      z.object({
-        address: z.string(),
-        walletlabel: z.nativeEnum(WalletLabel),
-        pageSize: z.number().optional(),
-        pageKey: z.string().optional(),
-      })
-    ).query(async ({ input }) => { 
-      try {
-        const assets = await NFTAssetMapper.map(
-          input.address, 
-          input.walletlabel, 
-          input.pageSize, 
-          input.pageKey
-        );
-        return assets;
-      } catch (error) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch token assets',
-          cause: error,
-        });
-      }
-    }),
-});
+    z.object({
+      address: z.string(),
+      walletlabel: z.nativeEnum(WalletLabel),
+      pageSize: z.number().optional(),
+      pageKey: z.string().optional(),
+    })
+  ).query(async ({ input }) => { 
+    try {
+      const assets = await NFTAssetMapper.map(
+        input.address, 
+        input.walletlabel, 
+        input.pageSize, 
+        input.pageKey
+      );
+      return assets;
+    } catch (error) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch token assets',
+        cause: error,
+      });
+    }
+  }),
+  
+  transferNFTAsset: publicProcedure.input(
+    z.object({
+      address: z.string(),
+      type: z.nativeEnum(AssetType),
+      walletlabel: z.nativeEnum(WalletLabel),
+      from: z.string(),
+      tokenId: z.bigint(),
+      to: z.string(),
+      amount: z.bigint(),
+    })
+  ).mutation(async ({ input }) => { 
+    try {
+      const result = await WagmiNFTClient.transfer(
+        web3Config,
+        {
+          ...input,
+          address: input.address as Address,
+          from: input.from as Address,
+          to: input.to as Address,
+        }
+      )
+      return result;
+    } catch (error) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to transfer NFT',
+        cause: error,
+      });
+    }
+  }),
+
+  transferTokenAsset: publicProcedure.input(
+    z.object({
+      address: z.string(),
+      type: z.nativeEnum(AssetType),
+      walletlabel: z.nativeEnum(WalletLabel),
+      from: z.string(),
+      to: z.string(),
+      amount: z.bigint(),
+    })
+  ).mutation(async ({ input }) => { 
+    try {
+      const result = await WagmiTokenClient.transfer(
+        web3Config,
+        {
+          ...input,
+          address: input.address as Address,
+          to: input.to as Address,
+        }
+      )
+      return result;
+    } catch (error) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to transfer NFT',
+        cause: error,
+      });
+    }
+  }),
+  
+}); 

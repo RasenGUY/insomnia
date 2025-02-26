@@ -1,23 +1,24 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Resolver, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { AssetSelector } from "./AssetSelector";
-import { RecipientInput } from "./RecipientInput";
-import { AmountInput } from "./AmountInput";
-import { NFTDetails } from "./NFTDetails";
-import { AssetType } from "@/types/assets";
-import { useAssetLoader } from "./hooks";
+import { Address } from "viem";
+
 import { 
   TokenSendFormValues, 
   NFTSendFormValues, 
   tokenSendFormSchema, 
   nftSendFormSchema 
 } from "@/lib/validations/sendForm";
-import { Address } from "viem";
+import { AssetSelector } from "./AssetSelector";
+import { RecipientInput } from "./RecipientInput";
+import { AmountInput } from "./AmountInput";
+import { NFTDetails } from "./NFTDetails";
+import { AssetType } from "@/types/assets";
+import { useAssetLoader } from "./hooks";
 
 interface SendTransactionFormProps {
   fromAddress: Address | undefined;
@@ -29,7 +30,6 @@ export default function SendTransactionForm({
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   const { selectedAsset, setSelectedAsset, tokenAssets, nftAssets } = useAssetLoader(fromAddress);
 
-  // Determine which schema to use based on selected asset type
   const isNFT = selectedAsset?.type === AssetType.ERC721 || selectedAsset?.type === AssetType.ERC1155;
   const resolver = isNFT ? zodResolver(nftSendFormSchema) : zodResolver(tokenSendFormSchema); 
   
@@ -40,13 +40,10 @@ export default function SendTransactionForm({
     watch, 
     setValue, 
     formState: { errors, isValid, dirtyFields }, 
-    getValues,
-    reset 
   } = useForm({
     resolver: resolver as Resolver<any>,
     mode: "onChange",
     defaultValues: {
-      userName: '',
       fromAddress: fromAddress,
       toAddress: "",
       asset: null,
@@ -54,10 +51,8 @@ export default function SendTransactionForm({
     }
   });
 
-  // Watch form values
   const selectedFormAsset = watch("asset");
   
-  // Handle asset selection
   const handleAssetSelect = (asset: typeof selectedAsset) => {
     if (!asset) return;
 
@@ -65,13 +60,11 @@ export default function SendTransactionForm({
     setValue("asset", asset, { shouldValidate: true });
     setIsAssetModalOpen(false);
 
-    // Set default amount for NFTs
     if (asset.type === AssetType.ERC721) {
       setValue("amount", "1", { shouldValidate: true });
     }
   };
 
-  // Handle form submission
   const onSubmit = async (data: TokenSendFormValues | NFTSendFormValues) => {
     try {
       // Here you would:
@@ -85,9 +78,6 @@ export default function SendTransactionForm({
     }
   };
 
-  useEffect(()=>{
-    console.log(errors)
-  })
   return (
     <Card className="w-full max-w-lg p-6">
       <form onSubmit={handleSubmit(onSubmit)}>

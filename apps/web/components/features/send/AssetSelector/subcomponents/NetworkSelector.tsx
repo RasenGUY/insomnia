@@ -1,4 +1,5 @@
 
+import { CHAINID_TO_LABEL } from "@/lib/constants/supported-chains";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { capitalizeStr } from "@/utils/format";
 
 interface NetworkSelectorProps {
   networks: number[];
@@ -20,14 +22,14 @@ export const NetworkSelector: React.FC<NetworkSelectorProps> = ({
 }) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <span className="w-[140px] justify-between">
-          {selectedNetwork ? `Chain ${selectedNetwork}` : "All Networks"}
-          <ChevronDown className="h-4 w-4 ml-2" />
+      <DropdownMenuTrigger>
+        <span className="relative ml-2 w-[fit-content] inline-flex justify-between">
+          {selectedNetwork ? CHAINID_TO_LABEL[selectedNetwork] : "All Networks"}
+          <ChevronDown className="h-4 w-4 ml-1 mt-1" />
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[140px]">
-        <DropdownMenuItem onClick={() => onSelect(null)}>
+        <DropdownMenuItem  onClick={() => onSelect(null)}>
           All Networks
         </DropdownMenuItem>
         {networks.map((network) => (
@@ -35,11 +37,10 @@ export const NetworkSelector: React.FC<NetworkSelectorProps> = ({
             key={network}
             onClick={() => onSelect(network)}
           >
-            Chain {network}
+            {capitalizeStr(CHAINID_TO_LABEL[network]?.toLowerCase() as string)} 
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-

@@ -141,7 +141,7 @@ export class NFTAssetMapper {
     return new Promise((resolve, reject) => {
       mapper.getNFTAssets(address, walletLabel, pageSize, pageKey).subscribe({
         next: (assets) => resolve(assets),
-        error: (err) => reject(err)
+        error: (err) => reject(err instanceof Error ? err : new Error(String(err)))
       });
     });
   }

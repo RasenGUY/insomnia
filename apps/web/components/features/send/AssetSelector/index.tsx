@@ -13,7 +13,6 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { Input } from "@workspace/ui/components/input";
-import { Button } from "@workspace/ui/components/button";
 import { TokenAsset, NFTAsset } from "@/types/assets";
 import { TokenList } from "./subcomponents/TokenList";
 import { NFTGrid } from "./subcomponents/NFTGrid";
@@ -96,14 +95,6 @@ export function AssetSelector({
             <DialogTitle className="text-xl font-semibold text-center">
               Select asset to send
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <X className="h-6 w-6" />
-            </Button>
           </DialogHeader>
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-2">
@@ -112,9 +103,9 @@ export function AssetSelector({
               defaultValue="tokens"
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as "tokens" | "nfts")}
-              className="w-full sm:w-auto"
+              className="w-full"
             >
-              <TabsList className="w-full sm:w-[170px] h-[46px] rounded-full">
+              <TabsList className="w-full sm:w-[170px] h-[46px] bg-inherit mb-3">
                 <TabsTrigger
                   value="tokens"
                   className="rounded-full w-full text-sm"
