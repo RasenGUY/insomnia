@@ -5,6 +5,7 @@ import { AssetType, NFTAsset, NFTAttribute } from "@/types/assets";
 import { WalletLabel } from "@/types/wallet";
 import { catchError, filter, from, mergeMap, Observable, of, toArray } from "rxjs";
 const OPENSEA_SAFE_LIST_REQUEST_STATUS_VERIFIED = 'verified';
+
 export class NFTAssetMapper {
   private readonly alchemyClient: AlchemyNFTClient;
   
