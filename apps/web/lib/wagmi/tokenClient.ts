@@ -17,6 +17,10 @@ export class WagmiTokenClient extends WagmiBaseClient {
     recipientAddress: Address, 
     amount: bigint
   ): Observable<TransactionReceipt> {
+        console.dir({
+          message: 'transferERC20',
+          config: this.config.chains,
+        }, { depth: null })
     return from(simulateContract(this.config, {
       address: tokenAddress,
       abi: this.erc20Abi,
@@ -24,7 +28,7 @@ export class WagmiTokenClient extends WagmiBaseClient {
       args: [recipientAddress, amount],
     })).pipe(
       map(({ request }) => request),
-      switchMap(request => from(this.handleContractWrite(this.config, request))),
+      switchMap(request => from(this.handleContractWrite(request))),
       catchError(error => {
         const errorMessage = error instanceof Error 
           ? error.message 
@@ -43,7 +47,7 @@ export class WagmiTokenClient extends WagmiBaseClient {
       value: amount,
     })).pipe(
       switchMap(request => from(sendTransaction(this.config, request))),
-      switchMap(hash => from(this.waitForTransactionReceipt(this.config, { hash }))),
+      switchMap(hash => from(this.waitForTransactionReceipt({ hash }))),
       map(receipt => {
         if (!receipt) {
           throw new Error('Transaction failed to be confirmed');

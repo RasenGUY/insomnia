@@ -7,9 +7,10 @@ import { WalletLabel } from '@/lib/constants/supported-chains';
 import { NFTAssetMapper } from '@/utils/nftAsset';
 import { AssetType } from '@/types/assets';
 import { WagmiNFTClient } from '@/lib/wagmi/nftClient';
-import { web3Config } from '@/components/providers/Web3Provider';  
+import { Config } from 'wagmi';  
 import { WagmiTokenClient } from '@/lib/wagmi/tokenClient'; 
 import { Address } from 'viem';
+import { web3Config } from '@/components/providers/Web3Provider';
 
 export const assetRouter = router({
   getTokenAssets: publicProcedure.input(
@@ -57,6 +58,7 @@ export const assetRouter = router({
   
   transferNFTAsset: publicProcedure.input(
     z.object({
+      web3Config: z.any(),
       address: z.string(),
       type: z.nativeEnum(AssetType),
       walletlabel: z.nativeEnum(WalletLabel),
@@ -68,7 +70,7 @@ export const assetRouter = router({
   ).mutation(async ({ input }) => { 
     try {
       const result = await WagmiNFTClient.transfer(
-        web3Config,
+        web3Config as Config,
         {
           ...input,
           address: input.address as Address,
@@ -88,17 +90,18 @@ export const assetRouter = router({
 
   transferTokenAsset: publicProcedure.input(
     z.object({
+      web3Config: z.any(),
       address: z.string(),
       type: z.nativeEnum(AssetType),
       walletlabel: z.nativeEnum(WalletLabel),
       from: z.string(),
       to: z.string(),
-      amount: z.bigint(),
+      amount: z.bigint().gt(0n),
     })
   ).mutation(async ({ input }) => { 
     try {
       const result = await WagmiTokenClient.transfer(
-        web3Config,
+        web3Config as Config,
         {
           ...input,
           address: input.address as Address,
@@ -106,10 +109,10 @@ export const assetRouter = router({
         }
       )
       return result;
-    } catch (error) {
+    } catch (error: any) {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to transfer NFT',
+        message: error.message,
         cause: error,
       });
     }

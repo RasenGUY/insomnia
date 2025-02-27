@@ -10,10 +10,6 @@ const baseFormSchema = z.object({
     .min(1, "Recipient address is required")
     .refine(
       (val) => {
-        console.log({
-          message: 'Address validation',
-          val
-        })
         return isAddress(val)
       },
       { message: "Invalid address format" }

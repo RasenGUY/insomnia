@@ -1,11 +1,11 @@
 'use client'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Resolver, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { Address } from "viem";
+import { Address, parseUnits } from "viem";
 import { toast } from "@workspace/ui/components/sonner";
 import { Loader2 } from "lucide-react";
 
@@ -19,15 +19,16 @@ import { AssetSelector } from "./AssetSelector";
 import { RecipientInput } from "./RecipientInput";
 import { AmountInput } from "./AmountInput";
 import { NFTDetails } from "./NFTDetails";
-import { AssetType } from "@/types/assets";
+import { AssetType, NFTAsset, TokenAsset } from "@/types/assets";
 import { useAssetLoader } from "./hooks";
 import { trpc } from "@/server/client";
 import { WalletLabel } from "@/lib/constants/supported-chains";
 import WagmiBaseClient from "@/lib/wagmi/wagmiBaseClient";
+import { web3Config } from "@/components/providers/Web3Provider";
 
 interface SendTransactionFormProps {
   fromAddress: Address | undefined;
-  walletLabel: WalletLabel; // Added wallet label prop for explorer links
+  walletLabel: WalletLabel;
 }
 
 export default function SendTransactionForm({
@@ -35,7 +36,12 @@ export default function SendTransactionForm({
   walletLabel
 }: Readonly<SendTransactionFormProps>) {
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
-  const { selectedAsset, setSelectedAsset, tokenAssets, nftAssets } = useAssetLoader(fromAddress);
+  const { 
+    selectedAsset, 
+    setSelectedAsset,
+    tokenAssets,
+    nftAssets
+  } = useAssetLoader(fromAddress);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isNFT = selectedAsset?.type === AssetType.ERC721 || selectedAsset?.type === AssetType.ERC1155;
@@ -64,11 +70,9 @@ export default function SendTransactionForm({
   
   const handleAssetSelect = (asset: typeof selectedAsset) => {
     if (!asset) return;
-
     setSelectedAsset(asset);
     setValue("asset", asset, { shouldValidate: true });
     setIsAssetModalOpen(false);
-
     if (asset.type === AssetType.ERC721) {
       setValue("amount", "1", { shouldValidate: true });
     }
@@ -183,52 +187,63 @@ export default function SendTransactionForm({
     setIsSubmitting(true);
     
     try {
-      const asset = data.asset;
+      const assetType = data.asset.type;
       const toAddress = data.toAddress as Address;
       
-      // Display confirmation toast
       toast.info("Processing transaction...", {
-        duration: 2000,
+        duration: 1000,
       });
       
-      if (asset.type === AssetType.ERC721 || asset.type === AssetType.ERC1155) {
-        // Handle NFT transfer
+      if (assetType === AssetType.ERC721 || assetType === AssetType.ERC1155) { 
         const nftData = data as NFTSendFormValues;
-        const amount = asset.type === AssetType.ERC721 ? 1n : BigInt(nftData.amount || "1");
+        const nftAsset = data.asset as NFTAsset;
+        const amount = assetType === AssetType.ERC721 ? 1n : BigInt(nftData.amount as string);
         
         transferNFTAsset({
-          address: asset.address as Address,
-          type: asset.type,
+          web3Config,
+          address: nftAsset.address as Address,
+          type: assetType,
           walletlabel: walletLabel,
           from: fromAddress,
-          tokenId: BigInt(asset.tokenId || "0"),
+          tokenId: BigInt(nftAsset.tokenId as string),
           to: toAddress,
           amount: amount
         });
+
       } else {
-        // Handle Token transfer (ERC20 or Native)
+        const tokenAsset = data.asset as TokenAsset 
         const tokenData = data as TokenSendFormValues;
-        const amount = BigInt(tokenData.amount) * (10n ** BigInt(asset?.meta?.decimals ?? 18)); 
-        
+        const amount = parseUnits(tokenData.amount.toString(), tokenAsset.meta?.decimals as number);  
+
         transferTokenAsset({
-          address: asset.,
-          type: asset.type,
+          web3Config,
+          address: tokenAsset.contractAddress,
+          type: assetType,
           walletlabel: walletLabel,
           from: fromAddress,
           to: toAddress,
-          amount: amount
+          amount
         });
       }
-    } catch (error) {
-      console.error("Transaction preparation failed:", error);
-      toast.error("Failed to prepare transaction", {
+    } catch (error: any) {
+      console.error(error);
+      toast.error(
+        <div className="flex flex-col gap-2">
+          <span>Transaction failed</span>
+          <span className="text-sm text-red-400">{error?.message}</span>
+        </div>, {
         duration: 3000,
       });
+      
       setIsSubmitting(false);
     }
   };
 
   const isLoading = isTransferringTokenAsset || isTransferringNFTAsset || isSubmitting;
+
+  useEffect(() => {
+    if(selectedAsset) handleAssetSelect(selectedAsset);
+  },[selectedAsset])
 
   return (
     <Card className="w-full max-w-lg p-6">

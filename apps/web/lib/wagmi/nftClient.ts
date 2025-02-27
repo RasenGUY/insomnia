@@ -3,9 +3,8 @@ import erc1155Abi from './artifacts/ERC1155.json';
 import { Config, simulateContract } from "@wagmi/core";
 import { from, Observable, switchMap } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-
 import WagmiBaseClient from "./wagmiBaseClient";
-import { AssetType, NFTAsset } from "@/types/assets";
+import { AssetType } from "@/types/assets";
 
 export class WagmiNFTClient extends WagmiBaseClient {
   private readonly erc721Abi: typeof erc721Abi = erc721Abi;
@@ -35,7 +34,7 @@ export class WagmiNFTClient extends WagmiBaseClient {
       args: [fromAddress, to, tokenId] as const,
     })).pipe(
       map(({ request }) => request),
-      switchMap((request) => from(this.handleContractWrite(this.config, request))),
+      switchMap((request) => from(this.handleContractWrite(request))),
       catchError(error => {
         const errorMessage = error instanceof Error 
           ? error.message 
@@ -65,7 +64,7 @@ export class WagmiNFTClient extends WagmiBaseClient {
       args: [fromAddress, to, tokenId, amount, data],
     })).pipe(
       map(({ request }) => request),
-      switchMap((request) => this.handleContractWrite(this.config, request)),
+      switchMap((request) => this.handleContractWrite(request)),
       catchError(error => {
         const errorMessage = error instanceof Error 
           ? error.message 

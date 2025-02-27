@@ -4,6 +4,7 @@ import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import { trpc } from '@/server/client';
 import {  getUrl } from '@/utils/trpc';
+import superjson from 'superjson';
 
 export function TRPCProvider(
   props: Readonly<{
@@ -16,6 +17,7 @@ export function TRPCProvider(
       links: [
         httpBatchLink({
           url: getUrl(),
+          transformer: superjson,
           headers: () => {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");

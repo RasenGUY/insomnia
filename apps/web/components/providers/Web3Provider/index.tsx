@@ -1,12 +1,12 @@
 "use client"
 
-import { WagmiProvider, createConfig, http } from "wagmi";
+import { WagmiProvider, createConfig, http, Config } from "wagmi";
 import { polygon } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { config } from "config/configClient";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 
-export const web3Config = createConfig(
+export const web3Config: Config = createConfig(
   getDefaultConfig({
     chains: [
       polygon

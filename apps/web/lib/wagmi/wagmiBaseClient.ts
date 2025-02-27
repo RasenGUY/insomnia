@@ -19,18 +19,17 @@ class WagmiBaseClient {
   ){
     this._config = config;
   }
-  get config(){
-    return this._config;
+  get config() {
+    return this._config
   }
-
-  handleContractWrite(config: Config, request: SimulateContractParameters): Observable<TransactionReceipt> {
-    return from(writeContract(config, request)).pipe(
-      switchMap(hash => this.waitForTransactionReceipt(config, { hash }))
+  handleContractWrite(request: SimulateContractParameters): Observable<TransactionReceipt> {
+    return from(writeContract(this._config, request)).pipe(
+      switchMap(hash => this.waitForTransactionReceipt({ hash }))
     );
   }
 
-  waitForTransactionReceipt(config: Config, params: { hash: `0x${string}` }): Observable<TransactionReceipt> {
-    return from(waitForTransactionReceipt(config, params));
+  waitForTransactionReceipt(params: { hash: `0x${string}` }): Observable<TransactionReceipt> {
+    return from(waitForTransactionReceipt(this._config, params));
   }
   
   static createExplorerTxHashUrl(walletLabel: WalletLabel, txHash: string): string {
