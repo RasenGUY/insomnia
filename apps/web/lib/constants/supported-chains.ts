@@ -37,3 +37,4 @@ export function getSupportedChainByWalletLabel(walletLabel: WalletLabel): Chain 
 export function getSupportedNetworkByWalletLabel(walletLabel: WalletLabel): string {  
   return SUPPORTED_NETWORKS[walletLabel];
 }
+

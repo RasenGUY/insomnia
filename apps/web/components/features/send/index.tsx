@@ -20,11 +20,9 @@ import { RecipientInput } from "./RecipientInput";
 import { AmountInput } from "./AmountInput";
 import { NFTDetails } from "./NFTDetails";
 import { AssetType, NFTAsset, TokenAsset } from "@/types/assets";
-import { useAssetLoader } from "./hooks";
-import { trpc } from "@/server/client";
+import { useAssetLoader } from "./hooks/assetLoader";
 import { WalletLabel } from "@/lib/constants/supported-chains";
-import WagmiBaseClient from "@/lib/wagmi/wagmiBaseClient";
-import { web3Config } from "@/components/providers/Web3Provider";
+import { useTransferToken } from "./hooks/transferTokens";
 
 interface SendTransactionFormProps {
   fromAddress: Address | undefined;
@@ -77,110 +75,15 @@ export default function SendTransactionForm({
       setValue("amount", "1", { shouldValidate: true });
     }
   };
-
-  const trpcUtils = trpc.useUtils();
   const {
-    mutate: transferTokenAsset,
+    transferTokenAsset,
+    reset: resetTokenAssetTransfer,
     isPending: isTransferringTokenAsset,
     isSuccess: isTokenAssetTransferred,
     isError: isTokenAssetTransferError,
     error: tokenAssetTransferError,
-    reset: resetTokenAssetTransfer,
-  } = trpc.assets.transferTokenAsset.useMutation({
-    onSuccess: (data) => {
-      resetNFTAssetTransfer();
-      resetTokenAssetTransfer();
-      trpcUtils.assets.invalidate();
-      
-      const explorerUrl = WagmiBaseClient.createExplorerTxHashUrl(walletLabel, data.transactionHash);
-      
-      toast.success(
-        <div className="flex flex-col gap-2">
-          <span>Transaction sent successfully!</span>
-          <a 
-            href={explorerUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700 underline"
-          >
-            View on blockchain explorer
-          </a>
-        </div>,
-        {
-          duration: 5000,
-        }
-      );
-      
-      // Reset form after successful transaction
-      reset();
-      setSelectedAsset(null);
-      setIsSubmitting(false);
-    },
-    onError: (error) => {
-      toast.error(
-        <div className="flex flex-col gap-2">
-          <span>Transaction failed</span>
-          <span className="text-sm text-red-400">{error.message}</span>
-        </div>,
-        {
-          duration: 5000,
-        }
-      );
-      setIsSubmitting(false);
-    }
-  });
-  
-  const {
-    mutate: transferNFTAsset,
-    isPending: isTransferringNFTAsset,
-    isSuccess: isNFTAssetTransferred,
-    isError: isNFTAssetTransferError,
-    error: nftAssetTransferError,
-    reset: resetNFTAssetTransfer,
-  } = trpc.assets.transferNFTAsset.useMutation({
-    onSuccess: (data) => {
-      resetNFTAssetTransfer();
-      resetTokenAssetTransfer();
-      trpcUtils.assets.invalidate();
-      
-      const explorerUrl = WagmiBaseClient.createExplorerTxHashUrl(walletLabel, data.transactionHash);
-      
-      toast.success(
-        <div className="flex flex-col gap-2">
-          <span>NFT sent successfully!</span>
-          <a 
-            href={explorerUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700 underline"
-          >
-            View on blockchain explorer
-          </a>
-        </div>,
-        {
-          duration: 5000,
-        }
-      );
-      
-      // Reset form after successful transaction
-      reset();
-      setSelectedAsset(null);
-      setIsSubmitting(false);
-    },
-    onError: (error) => {
-      toast.error(
-        <div className="flex flex-col gap-2">
-          <span>NFT transfer failed</span>
-          <span className="text-sm text-red-400">{error.message}</span>
-        </div>,
-        {
-          duration: 5000,
-        }
-      );
-      setIsSubmitting(false);
-    }
-  });
-  
+  } = useTransferToken();
+
   const onSubmit = async (data: TokenSendFormValues | NFTSendFormValues) => {
     if (!fromAddress || !data.asset || !data.toAddress) return;
     
@@ -194,39 +97,30 @@ export default function SendTransactionForm({
         duration: 1000,
       });
       
-      if (assetType === AssetType.ERC721 || assetType === AssetType.ERC1155) { 
-        const nftData = data as NFTSendFormValues;
-        const nftAsset = data.asset as NFTAsset;
-        const amount = assetType === AssetType.ERC721 ? 1n : BigInt(nftData.amount as string);
+      let amount: bigint;
+      
+      if(assetType == AssetType.ERC20 || assetType == AssetType.NATIVE) {   
+        const tokenData = data as TokenSendFormValues
+        const tokenAsset = data.asset as TokenAsset
+        amount = parseUnits(tokenData.amount.toString(), tokenAsset.meta?.decimals as number);
         
-        transferNFTAsset({
-          web3Config,
-          address: nftAsset.address as Address,
+        await transferTokenAsset({
           type: assetType,
-          walletlabel: walletLabel,
-          from: fromAddress,
-          tokenId: BigInt(nftAsset.tokenId as string),
-          to: toAddress,
-          amount: amount
-        });
-
-      } else {
-        const tokenAsset = data.asset as TokenAsset 
-        const tokenData = data as TokenSendFormValues;
-        const amount = parseUnits(tokenData.amount.toString(), tokenAsset.meta?.decimals as number);  
-
-        transferTokenAsset({
-          web3Config,
-          address: tokenAsset.contractAddress,
-          type: assetType,
-          walletlabel: walletLabel,
-          from: fromAddress,
+          contractAddress: (data.asset as TokenAsset).contractAddress as Address,
           to: toAddress,
           amount
-        });
+        })
+        resetTokenAssetTransfer();
+      } else if (assetType == AssetType.ERC721 || assetType == AssetType.ERC1155) {
+        const nftData = data as NFTSendFormValues;
+        const nftAsset = data.asset as NFTAsset;
+        amount = assetType === AssetType.ERC721 ? 1n : BigInt(nftData.amount as string);
       }
+
+
+    
+      
     } catch (error: any) {
-      console.error(error);
       toast.error(
         <div className="flex flex-col gap-2">
           <span>Transaction failed</span>

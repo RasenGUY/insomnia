@@ -4,7 +4,7 @@ interface AssetDisplayProps {
   asset: TokenAsset | NFTAsset;
 }
 
-export function AssetDisplay({ asset }: AssetDisplayProps) {
+export function AssetDisplay({ asset }: Readonly<AssetDisplayProps>) {
   const isNFT = asset.type === AssetType.ERC721 || asset.type === AssetType.ERC1155;
 
   return (
