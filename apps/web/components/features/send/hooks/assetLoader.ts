@@ -6,9 +6,11 @@ import { WalletLabel } from '@/lib/constants/supported-chains';
 import { getAddress } from 'viem';
 
 export function useAssetLoader(address: string | undefined) {
-  const [selectedAsset, setSelectedAsset] = useState<TokenAsset | NFTAsset | null>(null);
+  const [selectedTokenAsset, setSelectedTokenAsset] = useState<TokenAsset | null>(null);
+  const [selectedNFTAsset, setSelectedNFTAsset] = useState<NFTAsset | null>(null);
+  const [selectedAssetType, setSelectedAssetType] = useState<string | null>(null); 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const searchParams = useSearchParams();
-  
   
   const { data: tokenAssets } = trpc.assets.getTokenAssets.useQuery(
     { address: address ?? '', walletlabel: WalletLabel.POLYGON },
@@ -22,32 +24,50 @@ export function useAssetLoader(address: string | undefined) {
 
   useEffect(() => {
     if (!searchParams || !address) return;
+    setIsLoading(true);
     const assetAddress = searchParams.get('address');
     const assetType = searchParams.get('type');
     const tokenId = searchParams.get('tokenId');
     const chainId = searchParams.get('chainId');
+
+    if (!assetAddress || !assetType || !chainId) { 
+      setIsLoading(false);
+      return
+    };
     
-    if (!assetAddress || !assetType || !chainId) return;
-    
-    // Find the correct asset based on URL parameters
     if (assetType === AssetType.ERC721 || assetType === AssetType.ERC1155) {
       const nftAsset = nftAssets?.find(asset => 
         getAddress(asset.address) === getAddress(assetAddress) &&  
         asset.tokenId === tokenId &&
         asset.chainId === Number(chainId)
       );
-      if (nftAsset) setSelectedAsset(nftAsset);
+      if (nftAsset) setSelectedNFTAsset(nftAsset);
+      setIsLoading(false);
     } else {
       const tokenAsset = tokenAssets?.find(asset => getAddress(asset.contractAddress) === getAddress(assetAddress) &&
         asset.chainId === Number(chainId));
-      if (tokenAsset) setSelectedAsset(tokenAsset);
+      if (tokenAsset) 
+        setSelectedTokenAsset(tokenAsset);
+      setIsLoading(false);
     }
-  }, [searchParams, address, tokenAssets, nftAssets, selectedAsset]);
+    if(selectedTokenAsset || selectedNFTAsset) setSelectedAssetType(assetType);
+    return () => {
+      setSelectedNFTAsset(null);
+      setSelectedTokenAsset(null);
+      setSelectedAssetType(null);
+      setIsLoading(false);
+    };
+  }, [searchParams, address, tokenAssets, nftAssets, selectedTokenAsset, selectedNFTAsset]);
 
   return {
-    selectedAsset,
-    setSelectedAsset,
+    selectedTokenAsset,
+    setSelectedTokenAsset,
+    selectedNFTAsset,
+    setSelectedNFTAsset,
+    selectedAssetType,
+    setSelectedAssetType,
     tokenAssets,
+    isLoading,
     nftAssets
   };
 }

@@ -39,8 +39,8 @@ export const config: Config = {
       'https://',
       getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK'),
       '.g.alchemy.com/v2/',
-      getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY')
-    ].join(),
+      getRequiredEnvVar('NEXT_PUBLIC_ALCHEMY_PRIVATE_KEY')
+    ].join(''),
   },
 }
 

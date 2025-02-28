@@ -38,11 +38,11 @@ export function NFTDetails({ asset }: Readonly<NFTDetailsProps>) {
       </div>
 
       <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="aspect-square w-full relative">
+        <div className="aspect-square relative">
           <img
             src={asset.meta?.image || asset.image.thumbnailUrl || "/api/placeholder/512/512"}
             alt={asset.meta?.name || `NFT #${asset.tokenId}`}
-            className="w-full h-full object-cover"
+            className="w-[25%]"
           />
           
           {/* Network Badge */}

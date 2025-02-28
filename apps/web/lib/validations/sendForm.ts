@@ -16,45 +16,8 @@ const baseFormSchema = z.object({
     ),
 });
 
-// Schema for token-specific fields
-const tokenAssetSchema = z.object({
-  type: z.enum([AssetType.NATIVE, AssetType.ERC20]),
-  contractAddress: z.string(),
-  chainId: z.number(),
-  balance: z.string(),
-  meta: z.object({
-    decimals: z.number(),
-    symbol: z.string(),
-    name: z.string(),
-    logo: z.string().optional(),
-  }).optional(),
-  price: z.string().optional(),
-});
-
-const nftAssetSchema = z.object({
-  type: z.enum([AssetType.ERC721, AssetType.ERC1155]),
-  address: z.string(),
-  chainId: z.number(),
-  balance: z.string(),
-  tokenId: z.string().optional(),
-  meta: z.object({
-    name: z.string(),
-    description: z.string(),
-    image: z.string(),
-    symbol: z.string().nullable(),
-  }).optional(),
-  image: z.object({
-    thumbnailUrl: z.string().nullable(),
-    originalUrl: z.string().nullable(),
-  }),
-  collection: z.object({
-    name: z.string(),
-    slug: z.string(),
-  }).optional(),
-});
-
 export const tokenSendFormSchema = baseFormSchema.extend({
-  asset: tokenAssetSchema,
+  type: z.string(),
   amount: z.string()
     .refine(val => {
       const num = parseFloat(val);
@@ -63,18 +26,18 @@ export const tokenSendFormSchema = baseFormSchema.extend({
 });
 
 export const nftSendFormSchema = baseFormSchema.extend({
-  asset: nftAssetSchema,
-  amount: z.string().optional()
+  type: z.string(), 
+  amount: z.string()
 }).refine(data => {
   
-  if (data.asset?.type === AssetType.ERC721) {
+  if (data.type === AssetType.ERC721) {
     return data.amount === "1";
   }
   
-  const amount = parseFloat(data.amount ?? "0");
-  return !isNaN(amount) && amount > 0;
+  const amount = parseInt(data.amount ?? "0");
+  return !isNaN(amount) && amount > 0 && Number.isInteger(amount);
 }, {
-  message: "Invalid amount for NFT type",
+  message: "Amount must be a whole number greater than 0",
   path: ["amount"]
 });
 

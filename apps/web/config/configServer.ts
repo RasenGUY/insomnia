@@ -20,14 +20,14 @@ export const config: ConfigServer = {
         'https://',
         getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK'),
         '.g.alchemy.com/v2/',
-        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY'),
+        getRequiredEnvVar('NEXT_PUBLIC_ALCHEMY_PRIVATE_KEY'),
       ].join(''),
     },
     price: {
       url: 
         [
           'https://api.g.alchemy.com/prices/v1/',
-          getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY'),
+          getRequiredEnvVar('NEXT_PUBLIC_ALCHEMY_PRIVATE_KEY'),
       ].join(''),
     },
     nft: {
@@ -35,7 +35,7 @@ export const config: ConfigServer = {
         'https://',
         getRequiredEnvVar('NEXT_PUBLIC_DEFAULT_API_NETWORK'),
         '.g.alchemy.com/nft/v3/',
-        getRequiredEnvVar('NEXT_ALCHEMY_PRIVATE_KEY'),
+        getRequiredEnvVar('NEXT_PUBLIC_ALCHEMY_PRIVATE_KEY'),
       ].join(''),
     },
     rest: {

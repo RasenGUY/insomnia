@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
-import { Resolver, useForm, Controller } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
@@ -8,6 +8,9 @@ import { Input } from "@workspace/ui/components/input";
 import { Address, parseUnits } from "viem";
 import { toast } from "@workspace/ui/components/sonner";
 import { Loader2 } from "lucide-react";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { trpc } from "@/server/client";
+import { useRouter } from "next/navigation";
 
 import { 
   TokenSendFormValues, 
@@ -22,10 +25,16 @@ import { NFTDetails } from "./NFTDetails";
 import { AssetType, NFTAsset, TokenAsset } from "@/types/assets";
 import { useAssetLoader } from "./hooks/assetLoader";
 import { WalletLabel } from "@/lib/constants/supported-chains";
-import { useTransferToken } from "./hooks/transferTokens";
+import { 
+  useTransferNFTAsset,
+  useTransferTokenAsset,
+} from "./hooks";
+import { createExplorerTxHashUrl } from "@/utils/transaction";
+import { web3Config as config } from "@/components/providers/Web3Provider";
+import { LoadingScreen } from "../common/LoadingScreen";
 
 interface SendTransactionFormProps {
-  fromAddress: Address | undefined;
+  fromAddress: Address;
   walletLabel: WalletLabel;
 }
 
@@ -33,93 +42,127 @@ export default function SendTransactionForm({
   fromAddress,
   walletLabel
 }: Readonly<SendTransactionFormProps>) {
+  const router = useRouter();
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   const { 
-    selectedAsset, 
-    setSelectedAsset,
+    selectedTokenAsset, 
+    selectedNFTAsset,
+    setSelectedTokenAsset,
+    setSelectedNFTAsset,
+    selectedAssetType,
+    setSelectedAssetType,
     tokenAssets,
-    nftAssets
+    nftAssets,
+    isLoading: isAssetLoading
   } = useAssetLoader(fromAddress);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const isNFT = selectedAsset?.type === AssetType.ERC721 || selectedAsset?.type === AssetType.ERC1155;
-  const resolver = isNFT ? zodResolver(nftSendFormSchema) : zodResolver(tokenSendFormSchema); 
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const utils = trpc.useUtils();
+  const isNFT = selectedAssetType === AssetType.ERC721 || selectedAssetType === AssetType.ERC1155;
+  const resolver = isNFT ? 
+    zodResolver(nftSendFormSchema): 
+    zodResolver(tokenSendFormSchema);
+
+
+  const defaultValues = {
+    type: selectedAssetType ?? "",
+    fromAddress: fromAddress,
+    toAddress: "" as Address,
+    amount: ""
+  }
+
   const { 
     register, 
     control, 
     handleSubmit, 
-    watch, 
     setValue, 
     reset,
     formState: { errors, isValid, dirtyFields }, 
   } = useForm({
-    resolver: resolver as Resolver<any>,
+    resolver: resolver,
     mode: "onChange",
-    defaultValues: {
-      fromAddress: fromAddress,
-      toAddress: "",
-      asset: null,
-      amount: isNFT ? "1" : ""
-    }
+    defaultValues
   });
 
-  const selectedFormAsset = watch("asset");
-  
-  const handleAssetSelect = (asset: typeof selectedAsset) => {
+  const handleNFTAssetSelect = (asset: NFTAsset) => {
     if (!asset) return;
-    setSelectedAsset(asset);
-    setValue("asset", asset, { shouldValidate: true });
-    setIsAssetModalOpen(false);
-    if (asset.type === AssetType.ERC721) {
+    if(asset.type === AssetType.ERC721) { 
+      setSelectedNFTAsset(asset);
       setValue("amount", "1", { shouldValidate: true });
     }
   };
+
+  const handleTokenAssetSelect = (asset: TokenAsset) => {
+    if (!asset) return;
+    setSelectedTokenAsset(asset);
+  };
+
   const {
     transferTokenAsset,
     reset: resetTokenAssetTransfer,
     isPending: isTransferringTokenAsset,
-    isSuccess: isTokenAssetTransferred,
-    isError: isTokenAssetTransferError,
-    error: tokenAssetTransferError,
-  } = useTransferToken();
+  } = useTransferTokenAsset();
+  const handleTransferTokenAsset = async (asset: TokenAsset, data: TokenSendFormValues) => {
+    const amount = parseUnits(data.amount.toString(), asset.meta?.decimals as number);           
+    return transferTokenAsset({
+      type: asset.type,
+      contractAddress: asset.contractAddress as Address,
+      to: data.toAddress,
+      amount
+    })
+  }
 
+  const {
+    transferNFTAsset,
+    reset: resetNFTAssetTransfer,
+    isPending: isTransferringNFTAsset,
+  } = useTransferNFTAsset();
+  const handleTransferNFTAsset = async (asset: NFTAsset, data: NFTSendFormValues) => {
+    const amount = data.type !== AssetType.ERC721 ? BigInt(data.amount as string) : 1n;           
+    return transferNFTAsset({
+      type: asset.type,
+      contractAddress: asset.address as Address,
+      from: data.fromAddress as Address,
+      tokenId: BigInt(asset.tokenId), 
+      to: data.toAddress,
+      amount
+    })
+  }
+  
   const onSubmit = async (data: TokenSendFormValues | NFTSendFormValues) => {
-    if (!fromAddress || !data.asset || !data.toAddress) return;
-    
+    if(!selectedAssetType) return;
     setIsSubmitting(true);
-    
+    toast.info("Processing transaction...", {
+      duration: 1000,
+    });
+
     try {
-      const assetType = data.asset.type;
-      const toAddress = data.toAddress as Address;
       
-      toast.info("Processing transaction...", {
-        duration: 1000,
-      });
-      
-      let amount: bigint;
-      
-      if(assetType == AssetType.ERC20 || assetType == AssetType.NATIVE) {   
-        const tokenData = data as TokenSendFormValues
-        const tokenAsset = data.asset as TokenAsset
-        amount = parseUnits(tokenData.amount.toString(), tokenAsset.meta?.decimals as number);
-        
-        await transferTokenAsset({
-          type: assetType,
-          contractAddress: (data.asset as TokenAsset).contractAddress as Address,
-          to: toAddress,
-          amount
-        })
+      let hash: Address;
+      let explorerUrl: string;
+      if(selectedAssetType === AssetType.ERC20 || selectedAssetType === AssetType.NATIVE) {
+        if(!selectedTokenAsset) return;
+        hash = await handleTransferTokenAsset(selectedTokenAsset, data);
+        explorerUrl = createExplorerTxHashUrl(walletLabel, hash);
+        await waitForTransactionReceipt(config, { hash, confirmations: 1 });
+        setSelectedTokenAsset(null);
+        triggerTransferSuccessToast(explorerUrl);
         resetTokenAssetTransfer();
-      } else if (assetType == AssetType.ERC721 || assetType == AssetType.ERC1155) {
-        const nftData = data as NFTSendFormValues;
-        const nftAsset = data.asset as NFTAsset;
-        amount = assetType === AssetType.ERC721 ? 1n : BigInt(nftData.amount as string);
+        utils.assets.getTokenAssets.invalidate();
+      } else if (selectedAssetType === AssetType.ERC721 || selectedAssetType === AssetType.ERC1155) { 
+        if(!selectedNFTAsset) return;
+        hash = await handleTransferNFTAsset(selectedNFTAsset, data);
+        explorerUrl = createExplorerTxHashUrl(walletLabel, hash);
+        await waitForTransactionReceipt(config, { hash, confirmations: 1 });
+        setSelectedNFTAsset(null);
+        triggerTransferSuccessToast(explorerUrl);
+        resetNFTAssetTransfer();
+        utils.assets.getNFTAssets.invalidate();
       }
-
-
-    
       
+      setIsSubmitting(false);
+      reset();
+      router.replace(window.location.pathname);
     } catch (error: any) {
       toast.error(
         <div className="flex flex-col gap-2">
@@ -128,19 +171,28 @@ export default function SendTransactionForm({
         </div>, {
         duration: 3000,
       });
-      
       setIsSubmitting(false);
     }
   };
 
-  const isLoading = isTransferringTokenAsset || isTransferringNFTAsset || isSubmitting;
-
+  const isTransferringAsset = isTransferringTokenAsset || isTransferringNFTAsset || isSubmitting;
   useEffect(() => {
-    if(selectedAsset) handleAssetSelect(selectedAsset);
-  },[selectedAsset])
+    if(selectedTokenAsset) { 
+      handleTokenAssetSelect(selectedTokenAsset);
+      setSelectedAssetType(selectedTokenAsset.type);
+      setSelectedNFTAsset(null);
+    };
+    if(selectedNFTAsset) {
+      setSelectedTokenAsset(null);
+      handleNFTAssetSelect(selectedNFTAsset)
+      setSelectedAssetType(selectedNFTAsset.type);
+    };
+  },[selectedNFTAsset, selectedTokenAsset, selectedAssetType])
+
+  if(isAssetLoading) return <LoadingScreen fullScreen />;
 
   return (
-    <Card className="w-full max-w-lg p-6">
+    <Card className="p-6 min-w-[25rem]">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="p-0 space-y-6">
           {/* From Address */}
@@ -162,7 +214,7 @@ export default function SendTransactionForm({
               <RecipientInput
                 value={field.value}
                 onChange={field.onChange}
-                isDirty={dirtyFields['toAddress']}
+                isDirty={dirtyFields['toAddress'] as boolean}
                 setValue={(value: string) => field.onChange(value)}
                 error={errors.toAddress?.message as string}
               />
@@ -171,17 +223,19 @@ export default function SendTransactionForm({
 
           {/* Asset Selector */}
           <AssetSelector
-            value={selectedFormAsset}
-            onChange={handleAssetSelect}
+            value={selectedTokenAsset || selectedNFTAsset}
+            onChange={(asset: TokenAsset | NFTAsset) => {
+              if(asset.type === AssetType.ERC721 || asset.type === AssetType.ERC1155) return handleNFTAssetSelect(asset as NFTAsset);
+              return handleTokenAssetSelect(asset as TokenAsset);
+            }}
             isModalOpen={isAssetModalOpen}
             setIsModalOpen={setIsAssetModalOpen}
             tokenAssets={tokenAssets || []}
             nftAssets={nftAssets || []}
-            error={errors.asset?.message as string}
           />
 
           {/* Amount Input - hide for ERC721 NFTs */}
-          {(!selectedFormAsset || selectedFormAsset.type !== AssetType.ERC721) && (
+          {(selectedTokenAsset || selectedNFTAsset)  && ( 
             <Controller
               control={control}
               name="amount"
@@ -189,8 +243,8 @@ export default function SendTransactionForm({
                 <AmountInput
                   value={field.value}
                   onChange={field.onChange}
-                  asset={selectedFormAsset}
-                  disabled={selectedFormAsset?.type === AssetType.ERC721}
+                  asset={selectedTokenAsset || selectedNFTAsset}
+                  disabled={selectedAssetType === AssetType.ERC721}
                   error={errors.amount?.message as string}
                 />
               )}
@@ -198,17 +252,17 @@ export default function SendTransactionForm({
           )}
 
           {/* NFT Details */}
-          {selectedFormAsset && (selectedFormAsset.type === AssetType.ERC721 || selectedFormAsset.type === AssetType.ERC1155) && (
-            <NFTDetails asset={selectedFormAsset} />
+          {selectedNFTAsset && !selectedTokenAsset && (
+            <NFTDetails asset={selectedNFTAsset} />
           )}
 
           {/* Submit Button with Loading State */}
           <Button
             type="submit"
             className="w-full"
-            disabled={!isValid || isLoading}
+            disabled={!isValid || isTransferringAsset}
           >
-            {isLoading ? (
+            {isTransferringAsset ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Processing...</span>
@@ -222,3 +276,20 @@ export default function SendTransactionForm({
     </Card>
   );
 }
+
+const triggerTransferSuccessToast = (explorerUrl: string) => toast.success(
+  <div className="flex flex-col gap-2">
+    <span>Transaction sent successfully!</span> 
+    <a 
+      href={explorerUrl} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="text-blue-500 hover:text-blue-700 underline"
+    >
+      View on blockchain explorer
+    </a>
+  </div>,
+  {
+    duration: 3000,
+  }
+);

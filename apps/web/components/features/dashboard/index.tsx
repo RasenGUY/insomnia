@@ -8,13 +8,21 @@ import {
 import { TokenTabsContent } from "./TokenTabsContent";
 import { NFTTabsContent } from "./NFTTabsContent";
 import { NFTAsset, TokenAsset } from '@/types/assets';
+import { TokenTabsContentPlaceholder } from './TokenTabsContentPlaceholder';
+import { NFTTabsContentPlaceholder } from './NFTTabsContentPlaceholder';
 
 interface PortfolioViewProps {
-  tokenAssets: TokenAsset[];
-  nftAssets: NFTAsset[];
+  tokenAssets?: TokenAsset[];
+  nftAssets?: NFTAsset[];
 }
 
-const PortfolioView: React.FC<Readonly<PortfolioViewProps>> = ({ tokenAssets, nftAssets }) => {
+const PortfolioView: React.FC<Readonly<PortfolioViewProps>> = ({ 
+  tokenAssets, 
+  nftAssets, 
+}) => {
+  const showTokenPlaceholder = !tokenAssets;
+  const showNFTPlaceholder = !nftAssets;
+
   return (
     <div className="w-full p-6 pe-0">  
       <Tabs defaultValue="tokens">
@@ -28,8 +36,20 @@ const PortfolioView: React.FC<Readonly<PortfolioViewProps>> = ({ tokenAssets, nf
             NFTs
           </TabsTrigger>
         </TabsList>
-        <TokenTabsContent assets={tokenAssets} />
-        <NFTTabsContent assets={nftAssets} />
+        
+        {/* Token Tab Content */}
+        {showTokenPlaceholder ? (
+          <TokenTabsContentPlaceholder />
+        ) : (
+          <TokenTabsContent assets={tokenAssets} />
+        )}
+        
+        {/* NFT Tab Content */}
+        {showNFTPlaceholder ? (
+          <NFTTabsContentPlaceholder />
+        ) : (
+          <NFTTabsContent assets={nftAssets} />
+        )}
       </Tabs>
     </div>
   );

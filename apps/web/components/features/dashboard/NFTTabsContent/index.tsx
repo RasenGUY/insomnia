@@ -22,7 +22,7 @@ export const NFTTabsContent: React.FC<NFTTabsContentProps> = ({ assets }) => {
       address: encodeURIComponent(nft.address),
       tokenId: encodeURIComponent(nft.tokenId as string),
       chainId: encodeURIComponent(nft.chainId),
-      assetType: encodeURIComponent(nft.type),
+      type: encodeURIComponent(nft.type),
       balance: encodeURIComponent(nft.balance),
     }
     router.push(`/send?${writeStateToQueryString(nftData)}`);

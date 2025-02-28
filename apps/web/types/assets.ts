@@ -53,7 +53,7 @@ export interface NFTAsset {
   chainId: number;
   balance: string;
   floorPrice?: string;
-  tokenId?: string;
+  tokenId: string;
   meta?: NFTMetadata;
   image: NFTImage;
   aquiredAt?: {

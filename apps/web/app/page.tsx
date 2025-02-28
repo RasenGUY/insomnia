@@ -3,7 +3,6 @@ import React from 'react'
 import { useAccount } from 'wagmi'
 import PortfolioView from '@/components/features/dashboard'
 import { trpc } from '@/server/client';
-import { LoadingScreen } from '@/components/features/common/LoadingScreen';
 import { WalletLabel } from '@/types/wallet';
 
 
@@ -35,13 +34,10 @@ export default function AppPage() {
       refetchOnWindowFocus: true,
     }
   )
-  
-  if(!tokenAssets || !nftAssets) { 
-    return <LoadingScreen fullScreen/>
-  }
+
 
   return (
-    <section className="w-full flex justify-center items-center">
+    <section className="w-full flex justify-center items-center py-2">
       <PortfolioView tokenAssets={tokenAssets} nftAssets={nftAssets} /> 
     </section>
   )

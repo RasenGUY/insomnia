@@ -1,21 +1,15 @@
-import * as React from 'react'
 import { useSendTransaction, useWriteContract } from 'wagmi'
-import { waitForTransactionReceipt } from '@wagmi/core'
-import { Address, erc20Abi, TransactionReceipt } from 'viem'
+import { Address, erc20Abi } from 'viem'
 import { web3Config as config } from '@/components/providers/Web3Provider'
 import { AssetType } from '@/types/assets'
-import { trpc } from '@/server/client'
-import { toast } from '@workspace/ui/components/sonner'
-import { createExplorerTxHashUrl } from '@/utils/transaction'
-import { WalletLabel } from '@/types/wallet'
 
-type TransferTokenReturn = {
+type TransferTokenAssetReturn = {
   transferTokenAsset: (params: {
     type: AssetType;
     contractAddress?: Address;
     to: Address;
     amount: bigint;
-  }) => Promise<any>; 
+  }) => Promise<Address>; 
   isSuccess: boolean;
   isPending: boolean;
   isError: boolean;
@@ -25,15 +19,15 @@ type TransferTokenReturn = {
   reset: () => void;
 }
 
-export function useTransferToken(confirmations: number = 1): TransferTokenReturn {
-  const utils = trpc.useUtils()
+export function useTransferTokenAsset(): TransferTokenAssetReturn {
   const tokenMutation = useSendTransaction({
     config,
   })
   const erc20Mutation = useWriteContract({
     config,
   })
-  const transferTokenAsset = async ({
+
+  const transferTokenAsset = ({
     type,
     contractAddress,
     to,
@@ -44,9 +38,8 @@ export function useTransferToken(confirmations: number = 1): TransferTokenReturn
     to: Address,
     amount: bigint,
   }) => {
-    let hash: Address;
     if(type === AssetType.ERC20 && contractAddress) {
-      hash = await erc20Mutation.writeContractAsync({
+      return erc20Mutation.writeContractAsync({
         address: contractAddress,
         abi: erc20Abi,
         functionName: 'transfer',
@@ -55,41 +48,11 @@ export function useTransferToken(confirmations: number = 1): TransferTokenReturn
           amount,
         ],
       })
-    } else {
-      hash = await tokenMutation.sendTransactionAsync({
-        to,
-        value: amount,
-      })
-    }
-    waitForTx(hash)
-  }
-
-  const waitForTx = async (hash: Address) => {
-    try { 
-      await waitForTransactionReceipt(config, {
-        hash,
-        confirmations
-      })
-      utils.assets.getTokenAssets.invalidate()
-      toast.success(
-        <div className="flex flex-col gap-2">
-          <span>Transfer confirmed!</span>
-        </div>,
-        {
-          duration: 1500,
-        }
-      );
-    } catch (error: any) {
-      toast.error(
-        <div className="flex flex-col gap-2">
-          <span>Transaction failed</span>
-          <span className="text-sm text-red-400">{error.message}</span>
-        </div>,
-        {
-          duration: 1500,
-        }
-      );
-    }
+    } 
+    return tokenMutation.sendTransactionAsync({
+      to,
+      value: amount,
+    })
   }
 
   return {

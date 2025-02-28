@@ -159,7 +159,7 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                 <AlertCircle style={{
                   position: 'unset',
                 }} className="h-5 w-5" /> 
-                <AlertDescription style={{paddingLeft: '0.5rem'}}>
+                <AlertDescription style={{ paddingLeft: '0.5rem' }}>
                   No tokens found in this wallet.
                 </AlertDescription>
               </Alert>
