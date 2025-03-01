@@ -180,17 +180,6 @@ describe('WalletService', () => {
 
       mockPrismaService.wallet.count.mockResolvedValue(0);
       
-      const addressError = {
-        code: 'P2006',
-        clientVersion: '2.24.1',
-        meta: { target: ['address'] },
-        message: 'Invalid data provided',
-        name: 'PrismaClientKnownRequestError'
-      };
-      
-      mockPrismaService.wallet.create.mockImplementation(() => {
-        throw addressError;
-      });
 
       let error: any;
       try {
@@ -200,8 +189,7 @@ describe('WalletService', () => {
       }
 
       expect(error).toBeDefined();
-      expect(error.code).toBe('P2006');
-      expect(error.meta.target).toEqual(['address']);
+      expect(error.shortMessage).toContain('Address "invalid-address" is invalid');
     });
 
     it('should handle database connection errors', async () => {

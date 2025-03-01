@@ -85,4 +85,4 @@ export const TokenTabsContentPlaceholder = () => {
       </Card>
     </TabsContent>
   );
-};
+};  

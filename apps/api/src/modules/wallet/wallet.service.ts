@@ -23,7 +23,7 @@ export class WalletService {
     });
     const wallet = this.prisma.wallet.create({
       data: {
-        address: getAddress(data.address), // store checksummed address
+        address: getAddress(data.address),
         profileId: data.profileId,
         isDefault: walletCount === 0,
         label: data.label ?? WalletLabel.POLYGON

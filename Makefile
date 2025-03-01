@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: services-up services-up-build services-down services-clean dev-up dev-down dev-clean setup-env check-dependencies configure-pgadmin db-setup db-migrate
+.PHONY: services-up services-up-build services-down services-clean dev-up dev-down dev-clean setup-env check-dependencies configure-pgadmin db-setup db-migrate api-up api-down api-build api-up-build
 
 # Include postgres environment variables
 POSTGRES_ENV_FILE := ./services/postgres/.env
@@ -93,17 +93,43 @@ dev-down:
 
 dev-clean:
 	@echo "🧹 Cleaning up development environment..."
-	@cd apps/web && docker compose down -v
-	@cd apps/api && docker compose down -v
-	@cd services/postgres && docker compose down -v
-	@rm -f .pgpass pgadmin_init.json 2>/dev/null || true
-	@docker network rm insomnia-wallet-network 2>/dev/null || true
+	@$(MAKE) web-clean
+	@$(MAKE) api-clean
 	@echo "✅ Development environment cleaned"
 
 # Helper to check required dependencies
 check-dependencies:
 	@which docker >/dev/null 2>&1 || (echo "❌ Docker is required but not installed. Aborting." && exit 1)
 	@which docker-compose >/dev/null 2>&1 || (echo "❌ Docker Compose is required but not installed. Aborting." && exit 1)
+
+# API Container Management
+api-build: check-dependencies
+	@echo "🏗️  Building API container..."
+	@cd apps/api && DOCKER_BUILDKIT=1 docker build -t insomnia-wallet-api -f Dockerfile ../..
+	@echo "✅ API container built"
+
+api-up-build: setup-env api-build services-up-build
+	@echo "🚀 Starting API container..."
+	@echo "⏳ Waiting for postgres to be ready..."
+	@./scripts/wait-for-it.sh localhost:5432 -t 60
+	@cd apps/api && docker compose up -d 
+	@echo "✅ API container started"
+	@echo "🌍 API is available at http://localhost:4000"
+
+api-up: setup-env check-dependencies services-up
+	@echo "🚀 Starting API container..."
+	@echo "⏳ Waiting for postgres to be ready..."
+	@./scripts/wait-for-it.sh localhost:5432 -t 60
+	@cd apps/api && docker compose up -d 
+	@echo "✅ API container started"
+	@echo "🌍 API is available at http://localhost:4000"
+
+api-down:
+	@echo "🔽 Stopping API container..."
+	@cd apps/api && docker compose down -v
+	@echo "✅ API container stopped"
+	@$(MAKE) services-down
+	
 
 # Display help information
 help:
@@ -117,6 +143,10 @@ help:
 	@echo "  services-up-build  	- Rebuild and start all services"
 	@echo "  services-down      	- Stop all services"
 	@echo "  services-clean     	- Stop and clean all services (including volumes)"
+	@echo "  api-build         	- Build API container"
+	@echo "  api-up-build         	- Build API container and start it (also rebuilds and starts database)"
+	@echo "  api-up            	- Start API container (also starts database)"
+	@echo "  api-down          	- Stop API container"
 	@echo "  dev-up            	- Start complete development environment"
 	@echo "  dev-down          	- Stop development environment"
 	@echo "  dev-clean         	- Clean up development environment completely"

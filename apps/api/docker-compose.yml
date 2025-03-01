@@ -1,0 +1,17 @@
+services:
+  insomnia-wallet-api:
+    build:
+      context: ../../
+      dockerfile: apps/api/Dockerfile
+    container_name: insomnia-wallet-api
+    env_file:
+      - .env
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    networks:
+      - insomnia-wallet-network
+
+networks:
+  insomnia-wallet-network:
+    name: insomnia-wallet-network
+    external: true

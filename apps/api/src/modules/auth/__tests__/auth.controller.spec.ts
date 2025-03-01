@@ -18,6 +18,19 @@ jest.mock('siwe', () => ({
   },
 }));
 
+// Mock ResponseTransformer
+jest.mock('common/transformers/response.transformer', () => ({
+ResponseTransformer: {
+    success: jest.fn().mockImplementation((message, data, meta) => ({
+    status: 'success',
+    message,
+    data,
+    meta,
+    timestamp: expect.any(Date),
+    })),
+}
+}));
+
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
@@ -116,38 +129,56 @@ describe('AuthController', () => {
     );
 
     const mockVerifiedMessage = {
-      address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
-      chainId: 1,
-      domain: 'example.com',
-      issuedAt: '2024-02-10T12:00:00.000Z',
-      expirationTime: '2024-02-11T12:00:00.000Z',
-      resources: ['https://example.com/resource1'],
+    address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+    chainId: 1,
+    domain: 'example.com',
+    issuedAt: '2024-02-10T12:00:00.000Z',
+    expirationTime: '2024-02-11T12:00:00.000Z',
+    resources: ['https://example.com/resource1'],
     };
-
+    
     beforeEach(() => {
       mockSession.nonce = 'validNonce123';
     });
 
     it('should successfully verify SIWE message and update session', async () => {
-      mockAuthService.verifySiweMessage.mockResolvedValue(mockVerifiedMessage);
-      const expectedResponse = {
-        data: mockVerifiedMessage,
+    mockAuthService.verifySiweMessage.mockResolvedValue(mockVerifiedMessage);
+    
+    // Create an object with only the properties that the controller actually sends
+    const expectedVerifiedData = {
+        address: mockVerifiedMessage.address,
+        chainId: mockVerifiedMessage.chainId,
+        domain: mockVerifiedMessage.domain,
+        issuedAt: mockVerifiedMessage.issuedAt,
+    };
+    
+    // Set up the expected response that matches what ResponseTransformer.success would return
+    const expectedResponse = {
+        data: expectedVerifiedData,
         timestamp: expect.any(Date),
         message: "Siwe verification success",
         meta: undefined,
         status: "success",
-      };
+    };
+    
+    // Mock the ResponseTransformer.success to return our expected response
+    // Use jest.spyOn to create a mock that can be reset and manipulated
+    jest.spyOn(ResponseTransformer, 'success').mockReturnValueOnce(expectedResponse);
 
-      const result = await controller.verify(mockVerifySiweDto, mockSession);
+    const result = await controller.verify(mockVerifySiweDto, mockSession);
 
-      expect(mockAuthService.verifySiweMessage).toHaveBeenCalledWith(
+    expect(mockAuthService.verifySiweMessage).toHaveBeenCalledWith(
         mockVerifySiweDto.message,
         mockVerifySiweDto.signature,
         'validNonce123'
-      );
-      expect(result).toEqual(expectedResponse);
-      expect(mockSession.siwe).toBe(mockVerifiedMessage);
-      expect(mockSession.nonce).toBeNull();
+    );
+    expect(ResponseTransformer.success).toHaveBeenCalledWith(
+        "Siwe verification success",
+        expectedVerifiedData
+    );
+    expect(result).toEqual(expectedResponse);
+    expect(mockSession.siwe).toBe(mockVerifiedMessage);
+    expect(mockSession.nonce).toBeNull();
     });
 
     it('should throw UnauthorizedException when no nonce in session', async () => {

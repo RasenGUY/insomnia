@@ -15,19 +15,27 @@ jest.mock('common/transformers/model.transferformer', () => ({
 describe('ProfileService', () => {
   let service: ProfileService;
   let prismaService: PrismaService;
+  const FIXED_DATE = new Date('2025-01-01T00:00:00Z');
 
   const mockPrismaService = {
     profile: {
       create: jest.fn(),
       findUnique: jest.fn(),
-      findUniqueOrThrow: jest.fn(),
       findFirst: jest.fn(),
-      findFirstOrThrow: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     },
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(FIXED_DATE);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -52,8 +60,8 @@ describe('ProfileService', () => {
     const mockProfile: Profile = {
       id: 'profile-123',
       username: mockUsername,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: FIXED_DATE,
+      updatedAt: FIXED_DATE,
     };
 
     it('should successfully create a profile', async () => {
@@ -102,27 +110,27 @@ describe('ProfileService', () => {
       profileId: 'profile-123',
       isDefault: true,
       label: 'POLYGON',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: FIXED_DATE,
+      updatedAt: FIXED_DATE,
     };
     const mockProfile: Profile & { wallets: Wallet[] } = {
       id: 'profile-123',
       username: mockUsername,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: FIXED_DATE,
+      updatedAt: FIXED_DATE,
       wallets: [mockWallet],
     };
 
     it('should successfully find a profile by username with wallets', async () => {
-      mockPrismaService.profile.findUniqueOrThrow.mockResolvedValue(mockProfile);
-      (ModelTransformer.toProfileDto as jest.Mock).mockReturnValue({
+      mockPrismaService.profile.findUnique.mockResolvedValue(mockProfile);
+      (ModelTransformer.toDto as jest.Mock).mockReturnValue({
         ...mockProfile,
         wallets: mockProfile.wallets,
       });
 
       const result = await service.findProfileByUsername(mockUsername);
 
-      expect(mockPrismaService.profile.findUniqueOrThrow).toHaveBeenCalledWith({
+      expect(mockPrismaService.profile.findUnique).toHaveBeenCalledWith({
         where: { username: mockUsername },
         include: { wallets: true },
       });
@@ -140,7 +148,7 @@ describe('ProfileService', () => {
         message: 'Record not found',
       };
 
-      mockPrismaService.profile.findUniqueOrThrow.mockRejectedValue(notFoundError);
+      mockPrismaService.profile.findUnique.mockRejectedValue(notFoundError);
 
       await expect(service.findProfileByUsername('nonexistent')).rejects.toMatchObject({
         code: 'P2025',
@@ -150,7 +158,7 @@ describe('ProfileService', () => {
 
     it('should handle database connection errors', async () => {
       const dbError = new Error('Database connection failed');
-      mockPrismaService.profile.findUniqueOrThrow.mockRejectedValue(dbError);
+      mockPrismaService.profile.findUnique.mockRejectedValue(dbError);
 
       await expect(service.findProfileByUsername(mockUsername)).rejects.toThrow('Database connection failed');
     });
@@ -164,19 +172,19 @@ describe('ProfileService', () => {
       profileId: 'profile-123',
       isDefault: true,
       label: 'POLYGON',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: FIXED_DATE,
+      updatedAt: FIXED_DATE,
     };
     const mockProfile: Profile & { wallets: Wallet[] } = {
       id: 'profile-123',
       username: 'testuser123',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: FIXED_DATE,
+      updatedAt: FIXED_DATE,
       wallets: [mockWallet],
     };
 
     it('should successfully find a profile by wallet address', async () => {
-      mockPrismaService.profile.findFirstOrThrow.mockResolvedValue(mockProfile);
+      mockPrismaService.profile.findFirst.mockResolvedValue(mockProfile);
       (ModelTransformer.toDto as jest.Mock).mockReturnValue({
         ...mockProfile,
         wallets: mockProfile.wallets,
@@ -184,7 +192,7 @@ describe('ProfileService', () => {
 
       const result = await service.findProfileByWalletAddress(mockWalletAddress);
 
-      expect(mockPrismaService.profile.findFirstOrThrow).toHaveBeenCalledWith({
+      expect(mockPrismaService.profile.findFirst).toHaveBeenCalledWith({
         where: {
           wallets: {
             some: {
@@ -208,7 +216,7 @@ describe('ProfileService', () => {
         message: 'Record not found',
       };
 
-      mockPrismaService.profile.findFirstOrThrow.mockRejectedValue(notFoundError);
+      mockPrismaService.profile.findFirst.mockRejectedValue(notFoundError);
 
       await expect(service.findProfileByWalletAddress('0x1234')).rejects.toMatchObject({
         code: 'P2025',
@@ -225,7 +233,7 @@ describe('ProfileService', () => {
         message: 'Invalid data provided',
       };
 
-      mockPrismaService.profile.findFirstOrThrow.mockRejectedValue(invalidFormatError);
+      mockPrismaService.profile.findFirst.mockRejectedValue(invalidFormatError);
 
       await expect(service.findProfileByWalletAddress(invalidAddress)).rejects.toMatchObject({
         code: 'P2006',
@@ -248,7 +256,7 @@ describe('ProfileService', () => {
         wallets: mockMultipleWallets,
       };
 
-      mockPrismaService.profile.findFirstOrThrow.mockResolvedValue(mockProfileMultiWallets);
+      mockPrismaService.profile.findFirst.mockResolvedValue(mockProfileMultiWallets);
       (ModelTransformer.toDto as jest.Mock).mockReturnValue(mockProfileMultiWallets);
 
       const result = await service.findProfileByWalletAddress(mockWalletAddress);
@@ -259,7 +267,7 @@ describe('ProfileService', () => {
 
     it('should handle database timeout errors', async () => {
       const timeoutError = new Error('Database operation timeout');
-      mockPrismaService.profile.findFirstOrThrow.mockRejectedValue(timeoutError);
+      mockPrismaService.profile.findFirst.mockRejectedValue(timeoutError);
 
       await expect(service.findProfileByWalletAddress(mockWalletAddress)).rejects.toThrow('Database operation timeout');
     });
