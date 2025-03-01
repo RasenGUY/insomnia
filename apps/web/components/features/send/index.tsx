@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@workspace/ui/components/card";
@@ -31,7 +31,8 @@ import {
 } from "./hooks";
 import { createExplorerTxHashUrl } from "@/utils/transaction";
 import { web3Config as config } from "@/components/providers/Web3Provider";
-import { LoadingScreen } from "../common/LoadingScreen";
+import { LoadingScreen } from "@/components/features/common/LoadingScreen";
+import { SendTransactionFormPlaceholder } from "./FormPlaceholder";
 
 interface SendTransactionFormProps {
   fromAddress: Address;
@@ -53,7 +54,7 @@ export default function SendTransactionForm({
     setSelectedAssetType,
     tokenAssets,
     nftAssets,
-    isLoading: isAssetLoading
+    isLoading: isAssetLoading,
   } = useAssetLoader(fromAddress);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +63,6 @@ export default function SendTransactionForm({
   const resolver = isNFT ? 
     zodResolver(nftSendFormSchema): 
     zodResolver(tokenSendFormSchema);
-
 
   const defaultValues = {
     type: selectedAssetType ?? "",
@@ -86,15 +86,19 @@ export default function SendTransactionForm({
 
   const handleNFTAssetSelect = (asset: NFTAsset) => {
     if (!asset) return;
+    setSelectedNFTAsset(asset);
     if(asset.type === AssetType.ERC721) { 
-      setSelectedNFTAsset(asset);
       setValue("amount", "1", { shouldValidate: true });
     }
+    setSelectedAssetType(asset.type);
+    setSelectedTokenAsset(null);
   };
 
   const handleTokenAssetSelect = (asset: TokenAsset) => {
     if (!asset) return;
     setSelectedTokenAsset(asset);
+    setSelectedAssetType(asset.type);
+    setSelectedNFTAsset(null);
   };
 
   const {
@@ -176,23 +180,11 @@ export default function SendTransactionForm({
   };
 
   const isTransferringAsset = isTransferringTokenAsset || isTransferringNFTAsset || isSubmitting;
-  useEffect(() => {
-    if(selectedTokenAsset) { 
-      handleTokenAssetSelect(selectedTokenAsset);
-      setSelectedAssetType(selectedTokenAsset.type);
-      setSelectedNFTAsset(null);
-    };
-    if(selectedNFTAsset) {
-      setSelectedTokenAsset(null);
-      handleNFTAssetSelect(selectedNFTAsset)
-      setSelectedAssetType(selectedNFTAsset.type);
-    };
-  },[selectedNFTAsset, selectedTokenAsset, selectedAssetType])
 
-  if(isAssetLoading) return <LoadingScreen fullScreen />;
+  if(isAssetLoading) return <SendTransactionFormPlaceholder />;
 
   return (
-    <Card className="p-6 min-w-[25rem]">
+    <Card className="p-6 min-w-[27.5rem]">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="p-0 space-y-6">
           {/* From Address */}

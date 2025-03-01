@@ -12,7 +12,7 @@ interface NFTDetailsProps {
 
 export function NFTDetails({ asset }: Readonly<NFTDetailsProps>) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-[27.5rem]">
       <div className="flex items-center gap-2">
         <p className="font-semibold">NFT Details</p>
         <HoverCard>
@@ -42,7 +42,7 @@ export function NFTDetails({ asset }: Readonly<NFTDetailsProps>) {
           <img
             src={asset.meta?.image || asset.image.thumbnailUrl || "/api/placeholder/512/512"}
             alt={asset.meta?.name || `NFT #${asset.tokenId}`}
-            className="w-[25%]"
+            className="object-cover w-full h-full"
           />
           
           {/* Network Badge */}

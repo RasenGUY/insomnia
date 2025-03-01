@@ -9,30 +9,29 @@ export function useAssetLoader(address: string | undefined) {
   const [selectedTokenAsset, setSelectedTokenAsset] = useState<TokenAsset | null>(null);
   const [selectedNFTAsset, setSelectedNFTAsset] = useState<NFTAsset | null>(null);
   const [selectedAssetType, setSelectedAssetType] = useState<string | null>(null); 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const searchParams = useSearchParams();
   
-  const { data: tokenAssets } = trpc.assets.getTokenAssets.useQuery(
+  const { data: tokenAssets, isLoading: isTokenAssetsLoading } = trpc.assets.getTokenAssets.useQuery(
     { address: address ?? '', walletlabel: WalletLabel.POLYGON },
     { enabled: !!address }
   );
 
-  const { data: nftAssets } = trpc.assets.getNFTAssets.useQuery(
+  const { data: nftAssets, isLoading: isNFTAssetsLoading } = trpc.assets.getNFTAssets.useQuery(
     { address: address ?? '', walletlabel: WalletLabel.POLYGON },
     { enabled: !!address }
   );
 
   useEffect(() => {
-    if (!searchParams || !address) return;
-    setIsLoading(true);
+    if (!searchParams || !address) {
+      return;
+    }
     const assetAddress = searchParams.get('address');
     const assetType = searchParams.get('type');
     const tokenId = searchParams.get('tokenId');
     const chainId = searchParams.get('chainId');
-
+    setSelectedAssetType(assetType);
     if (!assetAddress || !assetType || !chainId) { 
-      setIsLoading(false);
-      return
+      return;
     };
     
     if (assetType === AssetType.ERC721 || assetType === AssetType.ERC1155) {
@@ -41,23 +40,28 @@ export function useAssetLoader(address: string | undefined) {
         asset.tokenId === tokenId &&
         asset.chainId === Number(chainId)
       );
-      if (nftAsset) setSelectedNFTAsset(nftAsset);
-      setIsLoading(false);
+      if (nftAsset) { 
+        setSelectedNFTAsset(nftAsset);
+        setSelectedTokenAsset(null);
+      }
     } else {
-      const tokenAsset = tokenAssets?.find(asset => getAddress(asset.contractAddress) === getAddress(assetAddress) &&
-        asset.chainId === Number(chainId));
-      if (tokenAsset) 
+      const tokenAsset = tokenAssets?.find(
+        asset => getAddress(asset.contractAddress) === getAddress(assetAddress) &&
+        asset.chainId === Number(chainId)
+      );
+      if (tokenAsset) {
         setSelectedTokenAsset(tokenAsset);
-      setIsLoading(false);
+        setSelectedNFTAsset(null);
+      }
     }
-    if(selectedTokenAsset || selectedNFTAsset) setSelectedAssetType(assetType);
+
     return () => {
       setSelectedNFTAsset(null);
       setSelectedTokenAsset(null);
       setSelectedAssetType(null);
-      setIsLoading(false);
     };
-  }, [searchParams, address, tokenAssets, nftAssets, selectedTokenAsset, selectedNFTAsset]);
+    
+  }, [searchParams, address, tokenAssets, nftAssets]);
 
   return {
     selectedTokenAsset,
@@ -66,8 +70,8 @@ export function useAssetLoader(address: string | undefined) {
     setSelectedNFTAsset,
     selectedAssetType,
     setSelectedAssetType,
+    isLoading: isTokenAssetsLoading || isNFTAssetsLoading,
     tokenAssets,
-    isLoading,
     nftAssets
   };
 }

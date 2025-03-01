@@ -2,7 +2,6 @@ import { z } from "zod";
 import { AssetType } from "@/types/assets";
 import { isAddress } from "viem";
 
-// Base schema for common fields
 const baseFormSchema = z.object({
   fromAddress: z.string().min(1, "Sender address is required"),
   toAddress: z
@@ -26,15 +25,17 @@ export const tokenSendFormSchema = baseFormSchema.extend({
 });
 
 export const nftSendFormSchema = baseFormSchema.extend({
-  type: z.string(), 
+  type: z.string(),
   amount: z.string()
 }).refine(data => {
   
   if (data.type === AssetType.ERC721) {
     return data.amount === "1";
   }
-  
-  const amount = parseInt(data.amount ?? "0");
+  const amount = parseFloat(data.amount ?? "0");
+  if (amount % 1 !== 0) {
+    return false;
+  }
   return !isNaN(amount) && amount > 0 && Number.isInteger(amount);
 }, {
   message: "Amount must be a whole number greater than 0",
