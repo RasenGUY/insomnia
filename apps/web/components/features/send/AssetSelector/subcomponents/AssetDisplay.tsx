@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { TokenAsset, NFTAsset, AssetType } from "@/types/assets";
 
 interface AssetDisplayProps {
@@ -11,7 +12,7 @@ export function AssetDisplay({ asset }: Readonly<AssetDisplayProps>) {
     <div className="flex items-center gap-3">
       <div className="relative">
         {isNFT ? (
-          <img
+          <Image
             src={
               (asset as NFTAsset).meta?.image ||
               (asset as NFTAsset).image.thumbnailUrl ||
@@ -21,13 +22,13 @@ export function AssetDisplay({ asset }: Readonly<AssetDisplayProps>) {
             className="w-8 h-8 rounded-lg"
           />
         ) : (
-          <img
+          <Image
             src={(asset as TokenAsset).meta?.logo || "/api/placeholder/32/32"}
             alt={(asset as TokenAsset).meta?.symbol || "Token"}
             className="w-8 h-8 rounded-full"
           />
         )}
-        <img
+        <Image
           src={`https://static.cx.metamask.io/api/v1/tokenIcons/${asset.chainId}/0x0000000000000000000000000000000000000000.png`}
           alt="Network"
           className="absolute -top-1 -right-1 w-4 h-4 rounded-full ring-1 ring-border"

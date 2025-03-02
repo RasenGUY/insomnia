@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { NFTAsset } from "@/types/assets";
 import {
   HoverCard,
@@ -39,7 +41,7 @@ export function NFTDetails({ asset }: Readonly<NFTDetailsProps>) {
 
       <div className="rounded-lg border bg-card overflow-hidden">
         <div className="aspect-square relative">
-          <img
+          <Image
             src={asset.meta?.image || asset.image.thumbnailUrl || "/api/placeholder/512/512"}
             alt={asset.meta?.name || `NFT #${asset.tokenId}`}
             className="object-cover w-full h-full"
@@ -48,7 +50,7 @@ export function NFTDetails({ asset }: Readonly<NFTDetailsProps>) {
           {/* Network Badge */}
           <div className="absolute top-2 right-2">
             <div className="bg-background/80 backdrop-blur-sm rounded-full p-1">
-              <img
+              <Image
                 src={`https://static.cx.metamask.io/api/v1/tokenIcons/${asset.chainId}/0x0000000000000000000000000000000000000000.png`}
                 alt={`Chain ${asset.chainId}`}
                 className="w-6 h-6 rounded-full"
