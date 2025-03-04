@@ -44,6 +44,10 @@ export const config: ConfigServer = {
   },
 }
 export const getServerConfiguration = async (): Promise<ConfigServer> => {
+  console.dir({
+    message: 'configServer',
+    config,
+  }, { depth: null })
   return config
 }
 

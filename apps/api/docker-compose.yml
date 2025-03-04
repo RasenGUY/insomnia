@@ -5,7 +5,7 @@ services:
       dockerfile: apps/api/Dockerfile
     container_name: insomnia-wallet-api
     env_file:
-      - .env.docker
+      - .env
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     networks:

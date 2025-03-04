@@ -63,7 +63,6 @@ RUN pnpm install --frozen-lockfile
 COPY --from=base /app/apps/api/dist /app/apps/api/dist
 COPY --from=base /app/apps/api/prisma /app/apps/api/prisma
 COPY --from=base /app/apps/api/docker-entrypoint.sh /app/apps/api/docker-entrypoint.sh
-COPY apps/api/.env /app/apps/api/.env 
 
 # Expose API port
 EXPOSE 4000

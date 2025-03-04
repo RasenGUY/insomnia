@@ -9,7 +9,8 @@ import session from 'express-session'
 
 // Local
 import { AppModule } from './app.module'
-import type { CorsConfig, SessionConfig, SwaggerConfig } from './config/config.interface'
+import type { CorsConfig, SessionConfig, SwaggerConfig, LogConfig } from './config/config.interface'
+import { env } from 'process'
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
@@ -20,8 +21,14 @@ async function bootstrap(): Promise<void> {
   // Winston Logger
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))
 
-
-
+  console.log({
+    message: 'config',
+    sessionConfig: app.get(ConfigService).get('session') as SessionConfig,
+    corsConfig: app.get(ConfigService).get('cors') as CorsConfig,
+    swaggerConfig: app.get(ConfigService).get('swagger') as SwaggerConfig,
+    env: app.get(ConfigService).get('env'),
+    log: app.get(ConfigService).get('log') as LogConfig,
+  })
   // Validation
   app.useGlobalPipes(
     new ValidationPipe({

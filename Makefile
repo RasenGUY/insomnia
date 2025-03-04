@@ -1,5 +1,10 @@
+
+
 SHELL := /bin/bash
-.PHONY: services-up services-up-build services-down services-clean up up-build down clean setup-env-local setup-env-docker check-dependencies configure-pgadmin db-setup db-migrate 
+.PHONY: services-up services-up-build services-down services-clean up up-build down clean setup-env-local setup-env-docker check-dependencies configure-pgadmin db-setup db-migrate
+
+POSTGRES_ENV_FILE := ./services/postgres/.env
+-include $(POSTGRES_ENV_FILE)
 
 # Helper to check required dependencies
 check-dependencies:
@@ -13,32 +18,38 @@ setup-env-local:
 	@test -f ./apps/web/.env || cp ./apps/web/.env.example ./apps/web/.env
 	@echo "✅ Environment files setup complete"
 
+
+setup-env-services-docker:
+	@echo "🔧 Setting up Services environment files..."
+	@test -f ./services/postgres/.env || cp ./services/postgres/.env.docker.example ./services/postgres/.env
+	@echo "✅ Environment files setup complete"
+
 setup-env-docker:
-	@echo "🔧 Setting up environment files..."
-	@test -f ./services/postgres/.env.docker || cp ./services/postgres/.env.docker.example ./services/postgres/.env.docker
-	@test -f ./apps/api/.env.docker || cp ./apps/api/.env.docker.example ./apps/api/.env.docker
-	@test -f ./apps/web/.env.docker || cp ./apps/web/.env.docker.example ./apps/web/.env.docker
+	@echo "🔧 Setting up Api environment files..."
+	@test -f ./apps/api/.env || cp ./apps/api/.env.docker.example ./apps/api/.env
+	@test -f ./apps/web/.env || cp ./apps/web/.env.docker.example ./apps/web/.env
 	@echo "✅ Environment files setup complete"
 
 # Configure PgAdmin
 configure-pgadmin:
 	@echo "🔧 Configuring pgAdmin..."
-	@if [ ! -f "$(./services/postgres/.env.docker)" ]; then \
+	@if [ ! -f "$(POSTGRES_ENV_FILE)" ]; then \
 		echo "❌ Postgres environment file not found. Running setup-env first..."; \
-		$(MAKE) setup-env; \
+		$(MAKE) setup-env-services-docker; \
 	fi
 	@echo '{"Servers":{"1":{"Name":"Insomnia DB","Group":"Servers","Host":"${HOST}","Port":5432,"MaintenanceDB":"$(POSTGRES_DB)","Username":"$(POSTGRES_USER)","SSLMode":"prefer","PassFile":"/pgpass"}}}' > services/postgres/pgadmin_init.json 
 	@echo "${HOST}:5432:$(POSTGRES_DB):$(POSTGRES_USER):$(POSTGRES_PASSWORD)" > services/postgres/.pgpass
 	@chmod 600 services/postgres/.pgpass
-	@echo "✅ pgAdmin configuration completed using variables from $(./services/postgres/.env.docker)"
+	@echo "✅ pgAdmin configuration completed using variables from $(POSTGRES_ENV_FILE)"
 
 # Services Management
-services-up: check-dependencies setup-env configure-pgadmin
+services-up: check-dependencies setup-env-services-docker configure-pgadmin
 	@echo "🚀 Starting services..."
 	@cd services/postgres && docker compose up -d
 	@echo "✅ Services started"
 
-services-up-build: check-dependencies setup-env configure-pgadmin
+	$(MAKE) 
+services-up-build: check-dependencies setup-env-services-docker configure-pgadmin
 	@echo "🏗️  Building and starting services..."
 	@cd services/postgres && docker compose up -d --build
 	@echo "✅ Services built and started"
@@ -56,14 +67,19 @@ services-clean:
 	@echo "✅ Services cleaned"
 
 # Api Management	
-up-build: setup-env services-up-build 
-	@echo "🚀 Starting API container..."
+up-build: services-up-build  setup-env-docker
+	@echo "🚀 Containerizing Application..."
 	@echo "⏳ Waiting for postgres to be ready..."
 	@./scripts/wait-for-it.sh localhost:5432 -t 60
+	@echo "🚀 Starting Api container..."
 	@cd apps/api && docker compose up -d --build 
+	@$(MAKE) db-migrate 
+	@echo "🚀 Starting Web container..."
 	@cd apps/web && docker compose up -d --build 
-	@echo "✅ API container started"
+	@echo "✅ Application Containerized"
 	@echo "🌍 API is available at http://localhost:4000"
+	@echo "🌍 PgAdmin 4 is available at http://localhost:4080"  
+	@echo "🌍 Web App is available at http://localhost:3000"
 
 up: services-up
 	@echo "🚀 Starting API container..."

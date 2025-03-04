@@ -5,9 +5,9 @@ services:
       dockerfile: apps/web/Dockerfile
     container_name: insomnia-wallet-web
     env_file:
-      - .env.docker
+      - .env
     ports:
-      - "3000:3000"
+      - "${PORT}:${PORT}"
     networks:
       - insomnia-wallet-network
 
