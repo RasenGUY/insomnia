@@ -15,6 +15,7 @@ node_modules/*
 .env.docker
 .env.production
 .env.development
+.env.docker
 
 # Testing
 coverage

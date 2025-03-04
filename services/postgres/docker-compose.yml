@@ -3,7 +3,7 @@ services:
     image: postgres:latest
     container_name: insomnia-wallet-postgres
     env_file:
-      - .env
+      - .env.docker
     ports:
       - "5432:5432"
     networks:
