@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from "next/image";
+
 import { TokenAsset } from "@/types/assets";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@workspace/ui/components/card";
@@ -72,7 +72,7 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                       <td className="py-4"> 
                         <div className="flex items-center">
                           <div className="relative mr-4">
-                            <Image 
+                            <img 
                               src={token.meta?.logo || "/api/placeholder/32/32"}
                               alt={token.meta?.symbol || "Token"} 
                               className="w-8 h-8 rounded-full object-cover min-w-[2rem]"
@@ -80,7 +80,7 @@ export const TokenTabsContent: React.FC<Readonly<TokenTabsContentProps>> = ({ as
                             {token.chainId && (
                               <div className="absolute -top-1 -right-1">
                                 <div className="w-4 h-4 rounded-full ring-1 ring-border overflow-hidden">
-                                  <Image 
+                                  <img
                                     src={`https://static.cx.metamask.io/api/v1/tokenIcons/${token.chainId}/0x0000000000000000000000000000000000000000.png`}
                                     alt="Chain"
                                     className="rounded-full"

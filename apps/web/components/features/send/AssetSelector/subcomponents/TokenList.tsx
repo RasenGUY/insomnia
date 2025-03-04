@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 import { TokenAsset } from "@/types/assets";
 import { formatBalance } from "@/utils/format";
 
@@ -27,12 +27,12 @@ export function TokenList({ assets, onSelect }: Readonly<TokenListProps>) {
         >
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Image
+              <img
                 src={asset.meta?.logo || "/api/placeholder/32/32"}
                 alt={asset.meta?.symbol || "Token"}
                 className="w-8 h-8 rounded-full"
               />
-              <Image
+              <img
                 src={`https://static.cx.metamask.io/api/v1/tokenIcons/${asset.chainId}/0x0000000000000000000000000000000000000000.png`}
                 alt="Network"
                 className="absolute -top-1 -right-1 w-4 h-4 rounded-full ring-1 ring-border"

@@ -45,10 +45,6 @@ export const config: Config = {
 }
 
 export const getClientConfiguration = async (): Promise<Config> => {
-  console.dir({
-    message: 'configClient',
-    config,
-  }, { depth: null })
   return config
 }
 

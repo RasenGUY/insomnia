@@ -1,7 +1,7 @@
 import { NFTAsset } from "@/types/assets";
 import { MoreHorizontal } from "lucide-react";
 import { AvatarImage, AvatarFallback, Avatar } from "@workspace/ui/components/avatar";
-import Image from "next/image";
+
 import { 
   DropdownMenu, 
   DropdownMenuTrigger, 
@@ -27,7 +27,7 @@ export const NFTCard: React.FC<NFTCardProps> = ({ nft, index, handleSend }) => {
     >
       {/* NFT Image */}
       <div className="flex shrink-0 aspect-square rounded-t-md bg-muted overflow-hidden items-center">
-        <Image
+        <img
           src={nft.meta?.image || nft.image.thumbnailUrl || '/api/placeholder/512/512'}
           alt={nft.meta?.name || 'NFT'}
           className="w-full h-full object-cover block"

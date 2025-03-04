@@ -14,10 +14,9 @@ check-dependencies:
 # Environment Setup for running in docker
 setup-env-local:
 	@echo "🔧 Setting up environment files..."
-	@test -f ./apps/api/.env || cp ./apps/api/.env.example ./apps/api/.env 
+	@test -f ./apps/api/.env || cp ./apps/api/.env.example ./apps/api/.env
 	@test -f ./apps/web/.env || cp ./apps/web/.env.example ./apps/web/.env
 	@echo "✅ Environment files setup complete"
-
 
 setup-env-services-docker:
 	@echo "🔧 Setting up Services environment files..."
@@ -27,6 +26,7 @@ setup-env-services-docker:
 setup-env-docker:
 	@echo "🔧 Setting up Api environment files..."
 	@test -f ./apps/api/.env || cp ./apps/api/.env.docker.example ./apps/api/.env
+	@test -f ./apps/api/.env.local || cp ./apps/api/.env.example ./apps/api/.env.local
 	@test -f ./apps/web/.env || cp ./apps/web/.env.docker.example ./apps/web/.env
 	@echo "✅ Environment files setup complete"
 
@@ -72,8 +72,8 @@ up-build: services-up-build  setup-env-docker
 	@echo "⏳ Waiting for postgres to be ready..."
 	@./scripts/wait-for-it.sh localhost:5432 -t 60
 	@echo "🚀 Starting Api container..."
-	@cd apps/api && docker compose up -d --build 
-	@$(MAKE) db-migrate 
+	@cd apps/api && docker compose up -d --build
+	@$(MAKE) db-migrate
 	@echo "🚀 Starting Web container..."
 	@cd apps/web && docker compose up -d --build 
 	@echo "✅ Application Containerized"

@@ -10,7 +10,7 @@ import { LoadingScreen } from '@/components/features/common/LoadingScreen'
 export default function RegisterPage() {
   const router = useRouter()
   const { address } = useAccount()
-
+  const utils = trpc.useUtils()
   const { data: profile, isLoading: isCheckingProfile } = trpc.resolver.reverse.useQuery(
     { address: address as string },
     {
@@ -21,6 +21,7 @@ export default function RegisterPage() {
   const register = trpc.auth.register.useMutation({
     onSuccess: () => {
       router.push('/')
+      utils.resolver.reverse.invalidate({ address: address as string })
     }
   })
 

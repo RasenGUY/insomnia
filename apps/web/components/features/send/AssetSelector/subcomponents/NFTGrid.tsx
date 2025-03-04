@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 import { NFTAsset } from "@/types/assets";
 
 interface NFTGridProps {
@@ -24,7 +24,7 @@ export function NFTGrid({ assets, onSelect }: Readonly<NFTGridProps>) {
           onClick={() => onSelect(asset)}
           className="group relative aspect-square rounded-lg overflow-hidden border border-border hover:border-primary transition-colors"
         >
-          <Image
+          <img
             src={asset.meta?.image || asset.image.thumbnailUrl || "/api/placeholder/512/512"}
             alt={asset.meta?.name || `NFT #${asset.tokenId}`}
             className="w-full h-full object-cover"
